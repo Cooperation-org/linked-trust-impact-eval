@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import styles from "../styles/Home.module.css";
 import { Inter } from "@next/font/google";
+import Layout from "../components/Layout";
+import { useViewerConnection } from "@self.id/framework";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Review() {
   const [tasks, setTasks] = useState([]);
+  const [connection] = useViewerConnection();
 
   useEffect(() => {
     fetch("/api/tasks")
@@ -54,8 +57,12 @@ export default function Review() {
   }
 
   return (
-    <main className={styles.main}>
-      <div style={{ display: "flex" }}>{tasksComponent}</div>
-    </main>
+    <Layout>
+      <main className={styles.main}>
+        {connection.status === "connected" && (
+          <div style={{ display: "flex" }}>{tasksComponent}</div>
+        )}
+      </main>
+    </Layout>
   );
 }

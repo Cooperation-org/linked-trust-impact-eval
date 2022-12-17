@@ -38,7 +38,7 @@ const ConnectButton = ({ connection, conncetFunc }) => {
   );
 };
 
-export default function Connect() {
+export default function Connect({ children }) {
   const [connection, connect, disconnect] = useViewerConnection();
   const [isConnected, setIsConnected] = useState(false);
   const [isEth, setIsEth] = useState(false);
@@ -88,6 +88,7 @@ export default function Connect() {
           </p>
         )}
       </div>
+      {children}
     </main>
   );
 }
