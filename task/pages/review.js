@@ -20,47 +20,62 @@ export default function Review() {
 
   let tasksComponent;
   if (tasks.length > 0) {
-    tasksComponent = tasks.map((task) => (
-      <div
-        key={task.id}
-        className={inter.className}
-        style={{
-          padding: "10px",
-          border: "1px solid black",
-          borderRadius: "5px",
-          marginRight: "10px",
-        }}
-      >
-        <div>Task: {task.task}</div>
-        <div>Claimant: {task.by}</div>
-        <div>Credit: {task.credit}</div>
-        <div>Round: {task.round}</div>
+    tasksComponent = tasks.map((task) => {
+      const by = task.by;
+      const acc = by.slice(0, 4) + "..." + by.slice(34);
+      console.log(acc);
+      return (
         <div
+          key={task.id}
+          className={inter.className}
           style={{
-            paddingTop: "20px",
-            display: "flex",
-            justifyContent: "center",
+            padding: "20px",
+            background: "white",
+            borderRadius: "5px",
+            margin: "10px 10px 0 0",
+            boxShadow: "1px 1px 2px rgba(0, 0, 0, .25)",
+            width: "200px",
           }}
         >
-          <button
-            className={styles.btn}
-            onClick={() => {
-              console.log("Approving");
-              // Make the claim in composedb
+          <div style={{ fontWeight: "300" }}>Task:</div>
+          <div style={{ fontWeight: "600" }}>{task.task}</div>
+          <div style={{ fontWeight: "300" }}>Claimant:</div>
+          <div style={{ fontWeight: "600" }}>{acc}</div>
+          <div style={{ fontWeight: "300" }}>Credit:</div>
+          <div style={{ fontWeight: "600" }}>{task.credit}</div>
+          <div style={{ fontWeight: "300" }}>Round:</div>
+          <div style={{ fontWeight: "600" }}>{task.round}</div>
+          <div
+            style={{
+              paddingTop: "20px",
+              display: "flex",
+              justifyContent: "center",
             }}
           >
-            Approve
-          </button>
+            <button
+              className={styles.btn}
+              onClick={() => {
+                console.log("Approving");
+                // Make the claim in composedb
+              }}
+            >
+              Approve
+            </button>
+          </div>
         </div>
-      </div>
-    ));
+      );
+    });
   }
 
   return (
     <Layout>
       <main className={styles.main}>
         {connection.status === "connected" && (
-          <div style={{ display: "flex" }}>{tasksComponent}</div>
+          <div
+            style={{ display: "flex", maxWidth: "1000px", flexWrap: "wrap" }}
+          >
+            {tasksComponent}
+          </div>
         )}
       </main>
     </Layout>

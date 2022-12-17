@@ -6,6 +6,19 @@ import { Inter } from "@next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
 
+async function addTask(task) {
+  const response = await fetch("/api/tasks", {
+    method: "POST",
+    body: JSON.stringify(task),
+  });
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+
+  return await response.json();
+}
+
 export default function Tasks(props) {
   const [connection] = useViewerConnection();
   const [claim, setClaim] = useState("");
@@ -60,9 +73,25 @@ export default function Tasks(props) {
                 <option value="december">December</option>
               </select>
               <button
-                onClick={(e) => {
+                onClick={async (e) => {
                   e.preventDefault();
-                  console.log("Adding task");
+                  if (!claim || !credit || !round) {
+                    return alert(
+                      "Claim, Credit & Round are all required fileds"
+                    );
+                  }
+                  const accounts = await window.ethereum.request({
+                    method: "eth_requestAccounts",
+                  });
+                  await addTask({
+                    task: claim,
+                    by: accounts[0],
+                    credit: Number(credit),
+                    round,
+                  });
+                  setClaim("");
+                  setCredit("");
+                  setRound("");
                 }}
                 className={styles.btn}
                 style={{ fontSize: "16px", marginTop: "20px" }}
