@@ -24,9 +24,13 @@ const ConnectButton = ({ connection, conncetFunc }) => {
         const accounts = await window.ethereum.request({
           method: "eth_requestAccounts",
         });
-        await conncetFunc(
+        const selfid = await conncetFunc(
           new EthereumAuthProvider(window.ethereum, accounts[0])
         );
+
+        const session = selfid.client.session; //or connection.selfID.client.session
+        const sessionString = session.serialize();
+        localStorage.setItem("sessionString", sessionString);
       }}
     >
       Connect
@@ -38,6 +42,20 @@ export default function Connect() {
   const [connection, connect, disconnect] = useViewerConnection();
   const [isConnected, setIsConnected] = useState(false);
   const [isEth, setIsEth] = useState(false);
+
+  useEffect(() => {
+    const sessionString = localStorage.getItem("sessionString");
+    if (sessionString && connection.status !== "connected") {
+      window.ethereum
+        .request({ method: "eth_requestAccounts" })
+        .then((addresses) => {
+          connect(
+            new EthereumAuthProvider(window.ethereum, addresses[0]),
+            sessionString
+          );
+        });
+    }
+  }, []);
 
   useEffect(() => {
     if (connection.status === "connected") {
