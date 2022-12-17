@@ -137,6 +137,37 @@
   z-index: -1;
 }
 
+.claimMain {
+  display: flex;
+  flex-direction: column;
+  padding-top: 6rem;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.claimForm {
+  display: flex;
+  flex-direction: column;
+  font-size: 1.5em;
+  width: 25rem;
+  max-width: 25rem;
+}
+
+.claimForm input, .claimForm select {
+  min-height: 3em;
+  border-radius: 0.5em;
+  padding: 0.5em;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.6em;
+}
+
+.contributor {
+  /* font-size: 1.5em; */
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
 /* Conic Gradient Animation */
 .thirteen::before {
   animation: 6s rotate linear infinite;
