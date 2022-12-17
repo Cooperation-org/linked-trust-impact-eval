@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useViewerConnection } from "@self.id/framework";
+import { useViewerConnection, EthereumAuthProvider } from "@self.id/framework";
 import styles from "../styles/Home.module.css";
 
 const Disconnect = ({ onDisconnect, connection }) => {
@@ -10,7 +10,7 @@ const Disconnect = ({ onDisconnect, connection }) => {
       }}
       className={styles.btn}
     >
-      Disconnect ({connection.selfID.id})
+      Disconnect ({connection.selfID?.id})
     </button>
   );
 };
@@ -60,20 +60,7 @@ export default function Connect() {
           <Disconnect onDisconnect={disconnect} connection={connection} />
         )}
         {isEth && !isConnected && (
-          <button
-            disabled={connection.status === "connecting"}
-            className={styles.btn}
-            onClick={async () => {
-              const accounts = await window.ethereum.request({
-                method: "eth_requestAccounts",
-              });
-              await connect(
-                new EthereumAuthProvider(window.ethereum, accounts[0])
-              );
-            }}
-          >
-            Connect
-          </button>
+          <ConnectButton connection={connection} conncetFunc={connect} />
         )}
         {!isEth && !isConnected && (
           <p>
