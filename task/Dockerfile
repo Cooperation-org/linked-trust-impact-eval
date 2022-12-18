@@ -7,9 +7,14 @@ COPY package.json package-lock.json ./
 RUN ["npm", "install"]
 
 COPY ./.next ./.next
+COPY ./components ./components
 COPY ./public ./public
 COPY ./pages ./pages
+COPY ./prisma ./prisma
+COPY ./public ./public
+COPY ./db ./db
 COPY ./styles ./styles
 COPY ./next.config.js ./next.config.js
 
+RUN ["npm", "run", "migrate:dev"]
 RUN ["npm", "run", "build"]
