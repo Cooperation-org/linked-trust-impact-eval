@@ -1,0 +1,10 @@
+type Claim @createModel(
+    accountRelation: LIST,
+    description: "Claim made by a contributor"
+) {
+    claim: String! @string(minLength: 1, maxLength: 1000)
+    by: String! @string(minLength: 1, maxLength: 64)
+    credit: Int!
+    signed_by: DID! @documentAccount
+    round: String! @string(minLength: 1, maxLength: 64)
+}

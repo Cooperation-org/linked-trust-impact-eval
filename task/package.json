@@ -4,6 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "migrate:dev": "prisma migrate dev",
+    "deploy:composite": "node scripts/deploy-composite.mjs",
+    "graphiql": "node scripts/graphiql.mjs",
+    "runtime:definition": "node scripts/create-definition.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -19,6 +23,12 @@
     "react-dom": "18.2.0"
   },
   "devDependencies": {
-    "prisma": "^4.7.1"
+    "@ceramicnetwork/http-client": "^2.11.0",
+    "@composedb/devtools-node": "^0.3.1",
+    "dids": "^3.4.0",
+    "key-did-provider-ed25519": "^2.0.1",
+    "key-did-resolver": "^2.3.0",
+    "prisma": "^4.7.1",
+    "uint8arrays": "^4.0.2"
   }
 }
