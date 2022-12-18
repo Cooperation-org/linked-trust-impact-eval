@@ -15,6 +15,8 @@ COPY ./public ./public
 COPY ./db ./db
 COPY ./styles ./styles
 COPY ./next.config.js ./next.config.js
+COPY ./compose ./compose
+COPY ./__generated__ ./__generated__
 
 RUN ["npm", "run", "migrate:dev"]
 RUN ["npm", "run", "build"]
