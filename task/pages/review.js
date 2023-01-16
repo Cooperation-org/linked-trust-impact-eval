@@ -6,8 +6,17 @@ import { useViewerConnection } from "@self.id/framework";
 import { getCompose } from "../compose";
 
 const inter = Inter({ subsets: ["latin"] });
+export const QUERY_CLAIM = `query {
+  claimIndex(first: 10) {
+    edges {
+      node {
+        by
+      }
+    }
+  }
+}`;
 
-export const CREATE_CLAIM = `
+export const CREATE_CLAIM2 = `
   mutation (
     $claim: String!
     $by: String!
@@ -37,10 +46,55 @@ export const CREATE_CLAIM = `
     }
   }
 `;
+const task = "";
+const by = "";
+const credit = 0;
+const round = "";
+
+export const CREATE_CLAIM = `
+  mutation {
+    createClaim(
+      input: {
+        content: {
+          claim: "my claim"
+          by: "MZ"
+          credit: 100
+          round: "first round"
+        }
+      }
+    ){
+      document {
+        id
+        claim
+        by
+        credit
+        signed_by {
+          id
+        }
+        round
+      }
+    }
+  }
+`;
+
+async function deleteTask(task) {
+  const response = await fetch("/api/tasks", {
+    method: "DELETE",
+    body: JSON.stringify(task),
+  });
+
+  if (!response.ok) {
+    console.log(response);
+    throw new Error(response.statusText);
+  }
+
+  return await response.json();
+}
 
 export default function Review() {
   const [tasks, setTasks] = useState([]);
   const [connection] = useViewerConnection();
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     fetch("/api/tasks")
@@ -87,21 +141,37 @@ export default function Review() {
               className={styles.btn}
               onClick={async () => {
                 const compose = await getCompose(connection.selfID.did);
+
                 const variables = {
                   claim: task,
                   by,
                   credit: Number(credit),
                   round,
                 };
+
+                const variablesStr = JSON.stringify(variables);
+
                 const composeDBResult = await compose.executeQuery(
                   CREATE_CLAIM,
                   variables
                 );
 
+                const dataStr = JSON.stringify(composeDBResult.data);
+
                 if (!composeDBResult.errors) {
+                  console.log("Accept - SUCCESS");
+                  setMessage(`Approved!`);
                   setTasks(() => {
+                    console.log(
+                      `setTasks filtering task: ${task.id} using ID ${id}`
+                    );
+                    deleteTask(id);
                     return tasks.filter((task) => task.id !== id);
                   });
+                } else {
+                  console.log("Approve - ERROR");
+                  console.log(`ComposeDB errors:  ${composeDBResult.errors}`);
+                  setMessage(`Error:  ${composeDBResult.errors}`);
                 }
 
                 // Make the claim in composedb
@@ -115,7 +185,8 @@ export default function Review() {
     });
   }
 
-  return (
+  console.log("Setting myLayout");
+  var myLayout = (
     <Layout>
       <main className={styles.main}>
         {connection.status === "connected" && (
@@ -123,9 +194,18 @@ export default function Review() {
             style={{ display: "flex", maxWidth: "1000px", flexWrap: "wrap" }}
           >
             {tasksComponent}
+            <div
+              style={{ margin: 10.0, padding: 10.0 }}
+              className={inter.className}
+            >
+              <p></p>
+              <p>{message}</p>
+            </div>
           </div>
         )}
       </main>
     </Layout>
   );
+  console.log("Going to return");
+  return myLayout;
 }

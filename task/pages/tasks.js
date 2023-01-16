@@ -13,6 +13,7 @@ async function addTask(task) {
   });
 
   if (!response.ok) {
+    console.log(response);
     throw new Error(response.statusText);
   }
 
@@ -24,6 +25,7 @@ export default function Tasks(props) {
   const [claim, setClaim] = useState("");
   const [credit, setCredit] = useState("");
   const [round, setRound] = useState("january");
+  const [message, setMessage] = useState("");
 
   return (
     <Layout>
@@ -72,6 +74,7 @@ export default function Tasks(props) {
                 <option value="november">November</option>
                 <option value="december">December</option>
               </select>
+
               <button
                 onClick={async (e) => {
                   e.preventDefault();
@@ -83,12 +86,16 @@ export default function Tasks(props) {
                   const accounts = await window.ethereum.request({
                     method: "eth_requestAccounts",
                   });
+                  console.log(`pages:tasks - credit:  ${credit}`);
                   await addTask({
                     task: claim,
                     by: accounts[0],
                     credit: Number(credit),
+
                     round,
                   });
+                  console.log("addTask complete!");
+                  setMessage("Task Added Successfully");
                   setClaim("");
                   setCredit("");
                   setRound("");
@@ -98,6 +105,13 @@ export default function Tasks(props) {
               >
                 Add task
               </button>
+              <div
+                style={{ margin: 10.0, padding: 10.0 }}
+                className={inter.className}
+              >
+                <p></p>
+                <p>{message}</p>
+              </div>
             </form>
           </div>
         )}
