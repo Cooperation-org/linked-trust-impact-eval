@@ -6,17 +6,8 @@ import { useViewerConnection } from "@self.id/framework";
 import { getCompose } from "../compose";
 
 const inter = Inter({ subsets: ["latin"] });
-export const QUERY_CLAIM = `query {
-  claimIndex(first: 10) {
-    edges {
-      node {
-        by
-      }
-    }
-  }
-}`;
 
-export const CREATE_CLAIM2 = `
+export const CREATE_CLAIM = `
   mutation (
     $claim: String!
     $by: String!
@@ -50,32 +41,6 @@ const task = "";
 const by = "";
 const credit = 0;
 const round = "";
-
-export const CREATE_CLAIM = `
-  mutation {
-    createClaim(
-      input: {
-        content: {
-          claim: "my claim"
-          by: "MZ"
-          credit: 100
-          round: "first round"
-        }
-      }
-    ){
-      document {
-        id
-        claim
-        by
-        credit
-        signed_by {
-          id
-        }
-        round
-      }
-    }
-  }
-`;
 
 async function deleteTask(task) {
   const response = await fetch("/api/tasks", {
@@ -149,8 +114,6 @@ export default function Review() {
                   round,
                 };
 
-                const variablesStr = JSON.stringify(variables);
-
                 const composeDBResult = await compose.executeQuery(
                   CREATE_CLAIM,
                   variables
@@ -159,7 +122,6 @@ export default function Review() {
                 const dataStr = JSON.stringify(composeDBResult.data);
 
                 if (!composeDBResult.errors) {
-                  console.log("Accept - SUCCESS");
                   setMessage(`Approved!`);
                   setTasks(() => {
                     console.log(
@@ -169,8 +131,6 @@ export default function Review() {
                     return tasks.filter((task) => task.id !== id);
                   });
                 } else {
-                  console.log("Approve - ERROR");
-                  console.log(`ComposeDB errors:  ${composeDBResult.errors}`);
                   setMessage(`Error:  ${composeDBResult.errors}`);
                 }
 
@@ -185,7 +145,6 @@ export default function Review() {
     });
   }
 
-  console.log("Setting myLayout");
   var myLayout = (
     <Layout>
       <main className={styles.main}>
@@ -206,6 +165,6 @@ export default function Review() {
       </main>
     </Layout>
   );
-  console.log("Going to return");
+
   return myLayout;
 }

@@ -13,7 +13,6 @@ async function addTask(task) {
   });
 
   if (!response.ok) {
-    console.log(response);
     throw new Error(response.statusText);
   }
 
@@ -86,7 +85,6 @@ export default function Tasks(props) {
                   const accounts = await window.ethereum.request({
                     method: "eth_requestAccounts",
                   });
-                  console.log(`pages:tasks - credit:  ${credit}`);
                   await addTask({
                     task: claim,
                     by: accounts[0],
@@ -94,7 +92,6 @@ export default function Tasks(props) {
 
                     round,
                   });
-                  console.log("addTask complete!");
                   setMessage("Task Added Successfully");
                   setClaim("");
                   setCredit("");
