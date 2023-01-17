@@ -1,0 +1,15 @@
+Uploading "./target/wasm32-wasi/release/bacalhau_compute.wasm" to server to execute command in context, press Ctrl+C to cancel
+Job successfully submitted. Job ID: 80c5ca9b-cb1f-446f-a370-60d790315557
+Checking job status... (Enter Ctrl+C to exit at any time, your job will continue running):
+
+	       Creating job for submission ... done ✅
+	       Finding node(s) for the job ... done ✅
+	             Node accepted the job ... done ✅
+	   Job finished, verifying results ... done ✅
+	      Results accepted, publishing ... Job Results By Node:
+
+To download the results, execute:
+  bacalhau get 80c5ca9b-cb1f-446f-a370-60d790315557
+
+To get more details about the run, execute:
+  bacalhau describe 80c5ca9b-cb1f-446f-a370-60d790315557
