@@ -1,0 +1,32 @@
+{
+  "tasks": [
+    {
+      "id": "clcqfykrt000g5fnfk6h0ah6c",
+      "task": "MZ Title",
+      "by": "a Wallet Address",
+      "credit": 10,
+      "round": "january"
+    },
+    {
+      "id": "clcqg6u2v000i5fnfg9lo8erg",
+      "task": "Task 2",
+      "by": "a Wallet Address",
+      "credit": 10,
+      "round": "february"
+    },
+    {
+      "id": "clcqg85cq000k5fnf1kkxx2vg",
+      "task": "My second task",
+      "by": "a Wallet Address",
+      "credit": 10,
+      "round": "january"
+    },
+    {
+      "id": "clcqgajcr000m5fnfi7qfs15q",
+      "task": "dkaldfj;adf",
+      "by": "a Wallet Address",
+      "credit": 10,
+      "round": "january"
+    }
+  ]
+}

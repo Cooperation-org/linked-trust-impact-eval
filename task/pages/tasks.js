@@ -24,6 +24,7 @@ export default function Tasks(props) {
   const [claim, setClaim] = useState("");
   const [credit, setCredit] = useState("");
   const [round, setRound] = useState("january");
+  const [message, setMessage] = useState("");
 
   return (
     <Layout>
@@ -72,6 +73,7 @@ export default function Tasks(props) {
                 <option value="november">November</option>
                 <option value="december">December</option>
               </select>
+
               <button
                 onClick={async (e) => {
                   e.preventDefault();
@@ -87,8 +89,10 @@ export default function Tasks(props) {
                     task: claim,
                     by: accounts[0],
                     credit: Number(credit),
+
                     round,
                   });
+                  setMessage("Task Added Successfully");
                   setClaim("");
                   setCredit("");
                   setRound("");
@@ -98,6 +102,13 @@ export default function Tasks(props) {
               >
                 Add task
               </button>
+              <div
+                style={{ margin: 10.0, padding: 10.0 }}
+                className={inter.className}
+              >
+                <p></p>
+                <p>{message}</p>
+              </div>
             </form>
           </div>
         )}
