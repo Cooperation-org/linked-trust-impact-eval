@@ -1,6 +1,7 @@
 use std::env;
 use std::process;
 use std::fs;
+use std::str;
 use std::fs::File;
 use std::io::Read;
 use std::error::Error;
@@ -55,7 +56,9 @@ fn run() -> Result<(), Box<dyn Error>> {
     } else {
         // fs::write("./outputs/tree.json",  merkle_tree);
         let tree_json = serde_json::to_string(&leafs).unwrap();
-        fs::write("./outputs/root.json", merkle_tree.root_hex().expect("ROOT DERIVATION FAILED").to_string()).unwrap();
+        let root_json = merkle_tree.root_hex().expect("ROOT DERIVATION FAILED").to_string();
+        let s = format!("{:?}", &root_json);
+        fs::write("./outputs/root.json", s).unwrap();
         fs::write("./outputs/tree.json", tree_json).unwrap();
 
     }

@@ -1,3 +1,0 @@
-cargo:rerun-if-changed=build/main.rs
-cargo:rustc-env=TYPENUM_BUILD_CONSTS=/home/stan36/repos/ImpactE/linked-trust-ie/bacalhau_Compute/target/debug/build/typenum-39216c1abf945cba/out/consts.rs
-cargo:rustc-env=TYPENUM_BUILD_OP=/home/stan36/repos/ImpactE/linked-trust-ie/bacalhau_Compute/target/debug/build/typenum-39216c1abf945cba/out/op.rs
