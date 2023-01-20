@@ -1,0 +1,20 @@
+type LinkedClaim @createModel( 
+     accountRelation: LIST, 
+     description: "Claim or attestation, possibly from 3rd party sources" ) 
+{ 
+    subject: String @string(minLength: 1, maxLength: 256)
+    claim: String @string(minLength: 1, maxLength: 1024)     
+    amount: Int!
+    amountUnits: String @string(minLength: 1, maxLength: 16)
+    effective_date: Date! 
+    statement: String @string(minLength: 1, maxLength: 16384) 
+    source: String @string(minLength: 1, maxLength: 1024) 
+    digestMultibase: String @string(minLength: 1, maxLength: 256)
+
+    aspect: String @string(minLength: 1, maxLength: 256)
+    object: String @string(minLength: 1, maxLength: 1024) 
+    confidence: //float 0 to 1
+    rating: //float -1 to 1
+    intendedAudience: String @string(minLength: 1, maxLength: 256)
+    respondAt: String @string(minLength: 1, maxLength: 1024) 
+}
