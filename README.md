@@ -1,4 +1,4 @@
-# Impact Evaluator Project
+# Impact Evaluator - Admin Console
 
 **Description**:
 
@@ -117,6 +117,8 @@ composedb graphql:server --ceramic-url=http://0.0.0.0:7007 --graphiql --port=500
 
 ## Usage
 
+### Interacting through the GraphiQL UI
+
 ###### Create an instance of a claim
 
 Launch the graphiQL URL in the browser and run the mutation below:
@@ -132,7 +134,7 @@ mutation {
 }
 ```
 
-### Query the first 10 instances of a claim
+#### Query the first 10 instances of a claim
 
 Launch the graphiQL URL in the browser and run the query below:
 
@@ -148,6 +150,8 @@ query {
 }
 ```
 
+### Interacting with ComposeDB Command Line
+
 ##### Get the details of the GraphQL Schema
 
 To check the details of the GraphQL schema built from your runtime composite representation, you can use the graphql:schema CLI command:
@@ -156,7 +160,7 @@ To check the details of the GraphQL schema built from your runtime composite rep
 composedb graphql:schema runtime-composite.json
 ```
 
-#### Interacting with the Admin Console App
+### Interacting with the Admin Console App
 
 ##### Create Tasks/Claims
 
@@ -172,4 +176,12 @@ This will present a list of Tasks/Claims that have been persisted to a local sql
 
 ```
 http://localhost:3000/review
+```
+
+##### Retrieve the CID for a Task
+
+Once a Task has been persisted to CeramicDB, you can retrieve the CID for that claim using the Stream ID.
+
+```
+http://localhost:3000/cid
 ```
