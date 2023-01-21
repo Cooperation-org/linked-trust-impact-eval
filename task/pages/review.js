@@ -120,9 +120,17 @@ export default function Review() {
                 );
 
                 const dataStr = JSON.stringify(composeDBResult.data);
+                console.log(
+                  `Stream ID:  ${composeDBResult.data.createClaim.document.id}`
+                );
+                console.log(
+                  `Compose Result: ${JSON.stringify(composeDBResult.data)}`
+                );
 
                 if (!composeDBResult.errors) {
-                  setMessage(`Approved!`);
+                  setMessage(
+                    `Approved and wrote Stream:  ${composeDBResult.data.createClaim.document.id}`
+                  );
                   setTasks(() => {
                     console.log(
                       `setTasks filtering task: ${task.id} using ID ${id}`
