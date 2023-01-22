@@ -91,7 +91,9 @@ pnpm dlx @ceramicnetwork/cli daemon
 
 ##### Converting a Schema to a composite
 
-composedb composite:create linked_claim.graphql --output=linked-claim-composite.json
+```
+composedb composite:create ./data/linked_claim.graphql --output=linked-claim-composite.json  --ceramic-url=http://0.0.0.0:7007
+```
 
 ##### Compile the Composite into a runtime definition
 
@@ -99,6 +101,8 @@ In order to interact with a composite at runtime, it is first necessary to creat
 
 ```
 composedb composite:compile linked-claim-composite.json linked-claim-composite-runtime.json --ceramic-url=http://0.0.0.0:7007
+
+composedb composite:compile linked-claim-composite.json ./__generated__/definition.js --ceramic-url=http://0.0.0.0:7007
 ```
 
 ##### Deploy the composite
@@ -112,7 +116,7 @@ composedb composite:deploy claim-composite.json --ceramic-url=http://0.0.0.0:700
 Start the local server with GraphiQL using the runtime composite:
 
 ```
-composedb graphql:server --ceramic-url=http://0.0.0.0:7007 --graphiql --port=5001 claim-composite-runtime.json
+composedb graphql:server --ceramic-url=http://0.0.0.0:7007 --graphiql --port=5001 linked-claim-composite-runtime.json
 ```
 
 ## Usage

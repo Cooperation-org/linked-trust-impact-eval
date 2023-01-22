@@ -10,37 +10,75 @@ const inter = Inter({ subsets: ["latin"] });
 export const CREATE_CLAIM = `
   mutation (
     $claim: String!
-    $by: String!
-    $credit: Int!
-    $round: String!
+    $claimed_by: String!
+    $root_claim_id: String
+    $amount: Int!
+    $effective_date: String!
   ){
-    createClaim(
+    createLinkedClaim(
       input: {
         content: {
           claim: $claim
-          by: $by
-          credit: $credit
-          round: $round
+          claimed_by: $claimed_by
+          root_claim_id: $root_claim_id
+          amount: $amount
+          effective_date: $effective_date
         }
       }
     ){
       document {
         id
         claim
-        by
-        credit
-        signed_by {
-          id
-        }
-        round
+        claimed_by
+        amount
+        root_claim_id
+        effective_date
       }
     }
   }
 `;
+
 const task = "";
 const by = "";
 const credit = 0;
 const round = "";
+var root_claim_id = " ";
+
+async function createClaim(compose, variables) {
+  const response = { message: "", streamID: "" };
+  const composeDBResult = await compose.executeQuery(CREATE_CLAIM, variables);
+  if (!composeDBResult.errors) {
+    response.streamID = composeDBResult.data.createLinkedClaim.document.id;
+    response.message = "SUCCESS";
+  } else {
+    response.message = `Error creating persisting ${composeDBResult.errors}`;
+  }
+  console.log(`createClaim - RESPONSE MESSAGE = ${response.message}`);
+  return response;
+}
+
+function getEffectiveDate(round) {
+  const monthMap = new Map([
+    ["january", 1],
+    ["february", 2],
+    ["march", 3],
+    ["april", 4],
+    ["may", 5],
+    ["june", 6],
+    ["july", 7],
+    ["august", 8],
+    ["september", 9],
+    ["october", 10],
+    ["november", 11],
+    ["december", 12],
+  ]);
+  const monthNum = monthMap.get(round);
+  var currentDate = new Date();
+  currentDate.setMonth(monthNum);
+  const effectiveDate =
+    String(monthNum) + "-01-" + String(currentDate.getFullYear());
+  return effectiveDate;
+}
 
 async function deleteTask(task) {
   const response = await fetch("/api/tasks", {
@@ -106,40 +144,54 @@ export default function Review() {
               className={styles.btn}
               onClick={async () => {
                 const compose = await getCompose(connection.selfID.did);
+                const effectiveDate = getEffectiveDate(round);
 
-                const variables = {
+                console.log(`Effective Date:  ${effectiveDate}`);
+
+                // This is the "Approved" Claim
+                const approvedVariables = {
                   claim: task,
-                  by,
-                  credit: Number(credit),
-                  round,
+                  claimed_by: by,
+                  amount: Number(credit),
+                  effective_date: effectiveDate,
+                  root_claim_id,
                 };
-
-                const composeDBResult = await compose.executeQuery(
-                  CREATE_CLAIM,
-                  variables
+                const approvedResponse = await createClaim(
+                  compose,
+                  approvedVariables
                 );
+                if (approvedResponse.message == "SUCCESS") {
+                  root_claim_id = approvedResponse.streamID;
+                  console.log("ComposeDB Approved executeQuery complete");
 
-                const dataStr = JSON.stringify(composeDBResult.data);
-                console.log(
-                  `Stream ID:  ${composeDBResult.data.createClaim.document.id}`
-                );
-                console.log(
-                  `Compose Result: ${JSON.stringify(composeDBResult.data)}`
-                );
-
-                if (!composeDBResult.errors) {
-                  setMessage(
-                    `Approved and wrote Stream:  ${composeDBResult.data.createClaim.document.id}`
+                  // This is the "Earned" Claim
+                  const earned_variables = {
+                    claim: task,
+                    claimed_by: by,
+                    amount: Number(credit),
+                    effective_date: effectiveDate,
+                    root_claim_id,
+                  };
+                  const earnedResponse = await createClaim(
+                    compose,
+                    earned_variables
                   );
-                  setTasks(() => {
-                    console.log(
-                      `setTasks filtering task: ${task.id} using ID ${id}`
+                  if (earnedResponse.message == "SUCCESS") {
+                    setMessage(
+                      `Approved Stream:  ${approvedResponse.streamID} and Earned Stream: ${earnedResponse.streamID}`
                     );
-                    deleteTask(id);
-                    return tasks.filter((task) => task.id !== id);
-                  });
+
+                    setTasks(() => {
+                      deleteTask(id);
+                      return tasks.filter((task) => task.id !== id);
+                    });
+                  } else {
+                    setMessage(
+                      `Approved Stream:  ${approvedResponse.streamID}. Failed on Earned Stream with error:  ${earnedResponse.message}`
+                    );
+                  }
                 } else {
-                  setMessage(`Error:  ${composeDBResult.errors}`);
+                  setMessage(approvedResponse.message);
                 }
 
                 // Make the claim in composedb
