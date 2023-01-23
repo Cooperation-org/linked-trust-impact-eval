@@ -6,7 +6,8 @@ use std::fs::File;
 use std::io::Read;
 use std::error::Error;
 use serde::{Serialize, Deserialize};
-use rs_merkle::{algorithms::Sha256, Hasher, MerkleTree};
+
+use sha256::digest;
 
 
 // Record matches expected json format of compose entry
@@ -26,8 +27,7 @@ struct Claim {
 fn run() -> Result<(), Box<dyn Error>> {
 // declare variables
     let mut total: u64 = 0;
-    let mut leafs = vec![];
-    let mut merkle_tree = MerkleTree::<Sha256>::new();
+    let mut leaves = vec![];
     // collect all input values
     let args: Vec<String> = env::args().collect();
     // have the user input the total maximum amount for the round(method will need updating before bacalhau ready)
@@ -42,11 +42,11 @@ fn run() -> Result<(), Box<dyn Error>> {
         // pull amount from record and add it to total
         total = total + record.credit.parse::<u64>().unwrap();
         // construct leaf from values stored in json
-        let mut leaf:  Vec<[u8; 32]> =  [Sha256::hash(record.subject.as_bytes()), Sha256::hash(record.credit.as_bytes())].to_vec();
-        //add leaf to tree
-        merkle_tree.append(&mut leaf);
-        merkle_tree.commit();
-        leafs.push([record.subject.to_string(), record.credit.to_string()]);
+        let mut leaf_string: String = record.subject.to_owned();
+        let amount: String = record.credit.to_owned();
+        leaf_string.push_str(&amount);
+        //add leaf to array
+        leaves.push(leaf_string);
         // print total amount parsed from jsons so far
         }
     // check if the total of all claims exceeds the allowed maximum
@@ -54,12 +54,28 @@ fn run() -> Result<(), Box<dyn Error>> {
         //if it does warn user of the amount exceeded and end the program
         process::exit(0);
     } else {
-        // fs::write("./outputs/tree.json",  merkle_tree);
-        let tree_json = serde_json::to_string(&leafs).unwrap();
-        let root_json = merkle_tree.root_hex().expect("ROOT DERIVATION FAILED").to_string();
-        let s = format!("{:?}", &root_json);
-        fs::write("./outputs/root.json", s).unwrap();
-        fs::write("./outputs/tree.json", tree_json).unwrap();
+        let mut tree: String = digest(leaves[0].clone());
+        let mut hashed_leaves = vec![];
+        hashed_leaves.push(tree.clone());
+
+         for leaf in leaves.iter().skip(1){
+             //get has of leaf
+            let branch = digest(&**leaf);
+            //pushed hased leaf to tree json
+            hashed_leaves.push(branch.clone());
+            //concat new leaf to existing tree
+            tree.push_str(&branch);
+            //hash new concated hashes
+            tree = digest(&*tree);
+
+        }
+
+        let tree_json = serde_json::to_string(&hashed_leaves).unwrap();
+
+        let root_json = serde_json::to_string(&tree).unwrap();
+
+        fs::write("./outputs/root.json", root_json).unwrap();
+        fs::write("./outputs/treehashed.json", tree_json).unwrap();
 
     }
     Ok(())
