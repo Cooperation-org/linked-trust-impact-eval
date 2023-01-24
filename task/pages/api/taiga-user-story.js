@@ -20,33 +20,33 @@ export default async function handler(req, res) {
       throw new Error(response.statusText);
     }
     const taigaUserStoryList = await response.json();
-    console.log(
-      `Taiga UserStory Response:  ${JSON.stringify(taigaUserStoryList)} `
-    );
     const userStoryList = getModel(taigaUserStoryList);
     return res.status(200).json(userStoryList);
+  } else {
+    return res.status(500).json("{message: not supported");
   }
 }
 function getModel(taigaUserStoryList) {
-  console.log(`UserStoryList length:  ${taigaUserStoryList.length.toString()}`);
   var userStoryList = {
     tasks: [],
   };
-  const summedPoints = getPoints(taigaUserStoryList[0].points);
-  console.log(`Points Calculated:  ${summedPoints}`);
+
   for (let i = 0; i < taigaUserStoryList.length; i++) {
+    const summedPoints = getPoints(taigaUserStoryList[i].points);
+    const pointsFactor = process.env.TAIGA_POINTS_FACTOR;
+    const claimAmount = (pointsFactor * summedPoints).toFixed(2);
+
     userStoryList.tasks[i] = {
       id: taigaUserStoryList[i].id,
       task: taigaUserStoryList[i].subject,
       owner: taigaUserStoryList[i].owner_extra_info.username,
       effectiveDate: String(taigaUserStoryList[i].finish_date).substring(0, 10),
       claimedBy: taigaUserStoryList[i].assigned_to_extra_info.username,
-      subject: taigaUserStoryList[i].project_extra_info.name,
-      amount: summedPoints,
+      project: taigaUserStoryList[i].project_extra_info.name,
+      amount: claimAmount,
     };
   }
 
-  console.log(`UserStory subject:   ${taigaUserStoryList[0].subject}`);
   return userStoryList;
 }
 
@@ -60,12 +60,10 @@ function getPoints(pointsList) {
   });
 
   var points = 0;
-
   for (let i = 0; i < keys.length; i++) {
     var newVal = pointsList[keys[i]];
-    console.log(`NewVal:  ${newVal}`);
     points += parseInt(newVal);
   }
-  console.log(`Summed Points:  ${points}`);
+
   return points;
 }

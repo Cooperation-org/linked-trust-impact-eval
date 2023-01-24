@@ -1,13 +1,15 @@
-type LinkedClaim
+type IEClaim
   @createModel(
     accountRelation: LIST
     description: "Claim or attestation, possibly from 3rd party sources"
   ) {
+  """
+  subject = Wallet Address
+  """
   subject: String @string(minLength: 1, maxLength: 256)
   claim: String @string(minLength: 1, maxLength: 1024)
-  claimed_by: String @string(minLength: 1, maxLength: 64)
   root_claim_id: String @string(minLength: 1, maxLength: 1024)
-  amount: Int!
+  amount: Int
   amountUnits: String @string(minLength: 1, maxLength: 16)
   effective_date: String! @string(minLength: 1, maxLength: 10)
   statement: String @string(minLength: 1, maxLength: 16384)
