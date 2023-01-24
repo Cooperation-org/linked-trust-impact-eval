@@ -6,8 +6,9 @@ use std::fs::File;
 use std::io::Read;
 use std::error::Error;
 use serde::{Serialize, Deserialize};
+use sha2::{Sha256, Digest};
+use hex::encode;
 
-use sha256::digest;
 
 
 // Record matches expected json format of compose entry
@@ -54,32 +55,71 @@ fn run() -> Result<(), Box<dyn Error>> {
         //if it does warn user of the amount exceeded and end the program
         process::exit(0);
     } else {
-        let mut tree: String = digest(leaves[0].clone());
-        let mut hashed_leaves = vec![];
-        hashed_leaves.push(tree.clone());
 
-         for leaf in leaves.iter().skip(1){
-             //get has of leaf
-            let branch = digest(&**leaf);
-            //pushed hased leaf to tree json
-            hashed_leaves.push(branch.clone());
-            //concat new leaf to existing tree
-            tree.push_str(&branch);
-            //hash new concated hashes
-            tree = digest(&*tree);
-
+        let mut tree: Vec<String> = vec![];
+        //loop through leaves
+        for leaf in leaves.iter() {
+            let previous_hash: String;
+            //if tree is empty
+            if tree.is_empty() {//previous hash is empty
+                previous_hash = "".to_string();
+                let new_leaf = encode_and_hash(&previous_hash, leaf);
+                let mut ox: String = "0x".to_owned();
+                let adjusted_leaf: String = new_leaf.to_owned();
+                ox.push_str(&adjusted_leaf);
+                //push the 0x'ed hash to tree array
+                println!("the leaf is {}", ox);
+                tree.push(ox);
+            } else {// if tree isnt empty grab previous hash
+                previous_hash = tree[tree.len() -1].clone();
+                let filler: String;
+                filler = "".to_string();
+                let hashed_leaf = encode_and_hash(&filler, leaf);
+                let mut ox1: String = "0x".to_owned();
+                let adjusted_leaf1: String = hashed_leaf.to_owned();
+                ox1.push_str(&adjusted_leaf1);
+                //hash together previous hash and current leaf
+                let new_leaf = encode_and_hash(&previous_hash, &ox1);
+                //add the 0x to the hash
+                let mut ox: String = "0x".to_owned();
+                let adjusted_leaf: String = new_leaf.to_owned();
+                ox.push_str(&adjusted_leaf);
+                //push the 0x'ed hash to tree array
+                println!("the leaf is {}", ox);
+                tree.push(ox);
+            }
         }
 
-        let tree_json = serde_json::to_string(&hashed_leaves).unwrap();
+        let root: String = tree[tree.len() -1].clone();
 
-        let root_json = serde_json::to_string(&tree).unwrap();
+        println!("the root produced is {}", root);
+
+        let tree_json = serde_json::to_string(&leaves).unwrap();
+        let root_json = serde_json::to_string(&root).unwrap();
 
         fs::write("./outputs/root.json", root_json).unwrap();
         fs::write("./outputs/treehashed.json", tree_json).unwrap();
 
     }
+
     Ok(())
 }
+
+fn abi_encode_packed(input1: &str, input2: &str) -> Vec<u8> {
+    let serialized_string1 = input1.as_bytes();
+    let serialized_string2 = input2.as_bytes();
+    let concatenated_bytes = [&serialized_string1[..], &serialized_string2[..]].concat();
+    concatenated_bytes
+}
+
+fn encode_and_hash(input1: &str, input2: &str) -> String {
+    let packed_encoding = abi_encode_packed(input1, input2);
+    let mut hasher = Sha256::new();
+    hasher.update(&packed_encoding);
+    let output = hasher.finalize();
+    encode(output)
+}
+
 
 // Main function. Start program here.
 fn main() {

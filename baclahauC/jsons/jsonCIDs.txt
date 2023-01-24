@@ -8,6 +8,7 @@ cargo run "1000" ./jsons/test1.json ./jsons/test2.json ./jsons/test3.json
 ## Bacalhau WASM/WASI run command:
 
 bacalhau wasm run ./target/wasm32-wasi/release/bacalhau_compute.wasm -v QmSCMeGh17KJWA9VHPftWqA1xdWM7McVtt3azxH3aenp1X:CID1 -v QmZhCRWWv8x6zJKhUKwnDNzerWoUaAjyeD4aSY8tGz6qE4:CID2 -v QmT3sHvzDBV53WqY2Z2Gt5U9zFPZYHKHMSKghbbkxt3zsM:CID3 1000 CID1 CID2 CID3 | tee jobID.txt
+
 ## Commands to retreive results from Bacalhau:
 
 rm -rf wasm_results && mkdir -p wasm_results
