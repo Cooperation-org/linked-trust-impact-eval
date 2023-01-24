@@ -53,9 +53,9 @@ fn run() -> Result<(), Box<dyn Error>> {
     // check if the total of all claims exceeds the allowed maximum
     if max < total {
         //if it does warn user of the amount exceeded and end the program
-        process::exit(0);
+        process::exit(1);
     } else {
-
+        // establish tree
         let mut tree: Vec<String> = vec![];
         //loop through leaves
         for leaf in leaves.iter() {
@@ -63,60 +63,69 @@ fn run() -> Result<(), Box<dyn Error>> {
             //if tree is empty
             if tree.is_empty() {//previous hash is empty
                 previous_hash = "".to_string();
+                // encode first leaf
                 let new_leaf = encode_and_hash(&previous_hash, leaf);
+                // 0x the hash
                 let mut ox: String = "0x".to_owned();
                 let adjusted_leaf: String = new_leaf.to_owned();
                 ox.push_str(&adjusted_leaf);
                 //push the 0x'ed hash to tree array
-                println!("the leaf is {}", ox);
                 tree.push(ox);
             } else {// if tree isnt empty grab previous hash
                 previous_hash = tree[tree.len() -1].clone();
-                let filler: String;
-                filler = "".to_string();
+                // establish empty filler
+                let filler: String = "".to_string();
+                //encode next leaf
                 let hashed_leaf = encode_and_hash(&filler, leaf);
+                // add 0x to hash
                 let mut ox1: String = "0x".to_owned();
                 let adjusted_leaf1: String = hashed_leaf.to_owned();
                 ox1.push_str(&adjusted_leaf1);
                 //hash together previous hash and current leaf
                 let new_leaf = encode_and_hash(&previous_hash, &ox1);
-                //add the 0x to the hash
+                //add the 0x to that hash
                 let mut ox: String = "0x".to_owned();
                 let adjusted_leaf: String = new_leaf.to_owned();
                 ox.push_str(&adjusted_leaf);
                 //push the 0x'ed hash to tree array
-                println!("the leaf is {}", ox);
                 tree.push(ox);
             }
         }
-
+        // grab root
         let root: String = tree[tree.len() -1].clone();
-
-        println!("the root produced is {}", root);
-
+        //jsonify root and tree
         let tree_json = serde_json::to_string(&leaves).unwrap();
         let root_json = serde_json::to_string(&root).unwrap();
-
+        //save jsons to outputs folder
         fs::write("./outputs/root.json", root_json).unwrap();
         fs::write("./outputs/treehashed.json", tree_json).unwrap();
-
     }
-
+    // OK
     Ok(())
 }
 
+// simulate solidities abi.encodePacked() function
 fn abi_encode_packed(input1: &str, input2: &str) -> Vec<u8> {
+    //serialize strings to bytes
     let serialized_string1 = input1.as_bytes();
     let serialized_string2 = input2.as_bytes();
+    //concat the serialized bytes
     let concatenated_bytes = [&serialized_string1[..], &serialized_string2[..]].concat();
+    // return concat
     concatenated_bytes
 }
 
+// simulate solidities sha256(abi.encodePacked()) functionality
 fn encode_and_hash(input1: &str, input2: &str) -> String {
+    // abi.encodePacked() input strings
     let packed_encoding = abi_encode_packed(input1, input2);
+    // establish hasher instance
     let mut hasher = Sha256::new();
+    // hash encoded/ concated strings
     hasher.update(&packed_encoding);
+    // finalize hashing
     let output = hasher.finalize();
+    // return as hex
     encode(output)
 }
 
