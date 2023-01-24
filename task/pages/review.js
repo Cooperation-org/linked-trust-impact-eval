@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import styles from "../styles/Home.module.css";
 import { Inter } from "@next/font/google";
 import Layout from "../components/Layout";
+import Head from "next/head";
+import Header from "../components/ReviewHeader";
 import { useViewerConnection } from "@self.id/framework";
 import { getCompose } from "../compose";
 
@@ -109,7 +111,7 @@ export default function Review() {
             padding: "5px",
             background: "white",
             borderRadius: "5px",
-            margin: "10px 10px 0 0",
+            margin: "15px 10px 0 0",
             boxShadow: "1px 1px 2px rgba(0, 0, 0, .25)",
             width: "200px",
           }}
@@ -241,24 +243,33 @@ export default function Review() {
                 }
               }}
             >
-              Distribute
+              Pay Earned
             </button>
           </div>
         </div>
       );
     });
+  } else {
+    return <div>Perform the Approval Process</div>;
   }
 
   var myLayout = (
     <Layout>
+      <Head>
+        <title>Impact Evaluator</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta charSet="utf-8" />
+      </Head>
+      <Header />
       <main className={styles.main}>
         {connection.status === "connected" && (
-          <div
-            style={{ display: "flex", maxWidth: "1000px", flexWrap: "wrap" }}
-          >
+          <div className="grid grid-cols-3 gap-4 p-5">
             <div>{tasksComponent}</div>
             <div
-              style={{ margin: 10.0, padding: 10.0 }}
+              style={{
+                margin: 0.0,
+                padding: 10.0,
+              }}
               className={inter.className}
             >
               <p></p>
