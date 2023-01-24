@@ -1,0 +1,22 @@
+Uploading "./bacalhau_compute.wasm" to server to execute command in context, press Ctrl+C to cancel
+Job successfully submitted. Job ID: 99e36bb3-0e5e-4883-8ba0-f963999d8b22
+Checking job status... (Enter Ctrl+C to exit at any time, your job will continue running):
+
+	    Communicating with the network ...       🐟
+	    Communicating with the network  ...      🐟 
+[K	    Communicating with the network  ................ done ✅  0.0s
+	       Creating job for submission  ...     🐟  
+[K	       Creating job for submission  ................ done ✅  0.0s
+	       Finding node(s) for the job  ...    🐟   
+[K	       Finding node(s) for the job  ................ done ✅  0.0s
+	                   Running the job  ...   🐟    
+[K	                   Running the job  ................ done ✅  0.0s
+	   Job finished, verifying results  ...  🐟     
+[K	   Job finished, verifying results  ................ done ✅  0.0s
+	      Results accepted, publishing  ...       🐠
+
+To download the results, execute:
+  bacalhau get 99e36bb3-0e5e-4883-8ba0-f963999d8b22
+
+To get more details about the run, execute:
+  bacalhau describe 99e36bb3-0e5e-4883-8ba0-f963999d8b22
