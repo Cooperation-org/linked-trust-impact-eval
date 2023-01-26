@@ -1,0 +1,20 @@
+.title {
+  font-family: Roboto, sans-serif;
+  font-weight: 400;
+}
+.paragraf {
+  font-family: Roboto, sans-serif;
+  font-weight: 300;
+}
+@media (max-width: 600px) {
+  .grid {
+    width: 100%;
+    flex-direction: column;
+  }
+}
+.btn {
+  border: 1px solid black;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  padding: 1rem 2.5rem;
+}

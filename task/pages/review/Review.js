@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
-import styles from "../styles/Home.module.css";
+import styles from "../../styles/Home.module.css";
 import { Inter } from "@next/font/google";
-import Layout from "../components/Layout";
 import Head from "next/head";
-import Header from "../components/ReviewHeader";
 import { useViewerConnection } from "@self.id/framework";
-import { getCompose } from "../compose";
+import { getCompose } from "../../compose";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -94,6 +92,7 @@ export default function Review() {
   }, []);
 
   let tasksComponent;
+  console.log(`Review() - ENTRY`);
   if (tasks.length > 0) {
     tasksComponent = tasks.map((taskInDB) => {
       const { id, task, claimedBy, project, amount, effectiveDate } = taskInDB;
@@ -111,7 +110,7 @@ export default function Review() {
             padding: "5px",
             background: "white",
             borderRadius: "5px",
-            margin: "15px 10px 0 0",
+            margin: "15px 10px 100px 100px",
             boxShadow: "1px 1px 2px rgba(0, 0, 0, .25)",
             width: "200px",
           }}
@@ -122,6 +121,7 @@ export default function Review() {
           <div style={{ padding: "0px 2px 10px 0px", fontWeight: "600" }}>
             {projectName}
           </div>
+
           <div style={{ padding: "0px 2px 3px 0px", fontWeight: "300" }}>
             Task:
           </div>
@@ -249,18 +249,19 @@ export default function Review() {
         </div>
       );
     });
-  } else {
-    return <div>Perform the Approval Process</div>;
   }
 
   var myLayout = (
-    <Layout>
+    <>
       <Head>
         <title>Impact Evaluator</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta charSet="utf-8" />
       </Head>
-      <Header />
+      <div className={styles.grid}>
+        <h1 className={styles.title}> Review page </h1>
+      </div>
+
       <main className={styles.main}>
         {connection.status === "connected" && (
           <div className="grid grid-cols-3 gap-4 p-5">
@@ -278,7 +279,7 @@ export default function Review() {
           </div>
         )}
       </main>
-    </Layout>
+    </>
   );
 
   return myLayout;

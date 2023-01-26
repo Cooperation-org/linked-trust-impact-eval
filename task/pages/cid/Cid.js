@@ -1,6 +1,9 @@
 import { useState } from "react";
-import styles from "../styles/Home.module.css";
+import styles from "../../styles/Cid.module.css";
 import { Inter } from "@next/font/google";
+// import head component
+import Head from "next/head";
+//  import css
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,7 +32,8 @@ export default function Cid(props) {
   return (
     <main className={styles.claimMain}>
       {
-        <div style={{ display: "flex" }} className={inter.className}>
+        //<div style={{ display: "flex" }} className={inter.className}>
+        <div className={styles.grid}>
           <form className={styles.claimForm}>
             <label htmlFor="streamID">StreamID: </label>
             <input
@@ -40,7 +44,7 @@ export default function Cid(props) {
               value={streamID || ""}
               onChange={(e) => setStreamID(e.target.value)}
             />
-            <div>
+            <div className={styles.button}>
               <button
                 onClick={async (e) => {
                   e.preventDefault();
@@ -64,7 +68,7 @@ export default function Cid(props) {
               </button>
             </div>
 
-            <div className="wrap">
+            <div className="wrap" style={{ marginTop: "20px" }}>
               <div className="wrap">
                 <label htmlFor="cid">CID:</label>
               </div>

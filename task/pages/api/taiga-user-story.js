@@ -1,4 +1,3 @@
-import UserStory from "../../models/taiga-model";
 const TOKEN = process.env.TAIGA_TOKEN;
 const PROJECT_ID = process.env.TAIGA_PROJECT_ID;
 
