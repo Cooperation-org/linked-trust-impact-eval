@@ -10,59 +10,81 @@ const inter = Inter({ subsets: ["latin"] });
 export const CREATE_CLAIM = `
   mutation (
     $claim: String!
-    $by: String!
-    $credit: Int!
-    $round: String!
+    $subject: String!
+    $root_claim_id: String
+    $amount: Int
+    $effective_date: String!
   ){
-    createClaim(
+    createIEClaim(
       input: {
         content: {
           claim: $claim
-          by: $by
-          credit: $credit
-          round: $round
+          subject: $subject
+          root_claim_id: $root_claim_id
+          amount: $amount
+          effective_date: $effective_date
         }
       }
     ){
       document {
         id
         claim
-        by
-        credit
-        signed_by {
-          id
-        }
-        round
+        subject
+        amount
+        root_claim_id
+        effective_date
       }
     }
   }
 `;
+
 const task = "";
 const by = "";
 const credit = 0;
 const round = "";
+var root_claim_id = " ";
 
-async function deleteTask(task) {
-  const response = await fetch("/api/tasks", {
-    method: "DELETE",
-    body: JSON.stringify(task),
+async function updateUserStory(id) {
+  /*
+  const response = await fetch("/api/taiga-user-story", {
+    method: "PATCH",
+    //body: JSON.stringify(task),
   });
 
   if (!response.ok) {
-    console.log(response);
     throw new Error(response.statusText);
   }
+  const userStories = await response.json();
+  return userStories;
+  */
+  return "SUCCESS";
+}
 
-  return await response.json();
+async function createClaim(compose, variables) {
+  const response = { message: "", streamID: "" };
+  const composeDBResult = await compose.executeQuery(CREATE_CLAIM, variables);
+  if (!composeDBResult.errors) {
+    response.streamID = composeDBResult.data.createIEClaim.document.id;
+    response.message = "SUCCESS";
+  } else {
+    response.message = `Error creating persisting ${composeDBResult.errors}`;
+  }
+  return response;
+}
+function handleDistributeClaim(task) {
+  // TODO Implment this.  It should launch a new page to handle splitting
+  // a claim distribution.
+  console.log("handleDistributeClaim - ENTRY");
 }
 
 export default function Review() {
   const [tasks, setTasks] = useState([]);
   const [connection] = useViewerConnection();
   const [message, setMessage] = useState("");
+  const [projectName, setProjectName] = useState("");
 
   useEffect(() => {
-    fetch("/api/tasks")
+    fetch("/api/taiga-user-story")
       .then((res) => res.json())
       .then((b) => {
         setTasks(b.tasks);
@@ -72,14 +94,19 @@ export default function Review() {
   let tasksComponent;
   if (tasks.length > 0) {
     tasksComponent = tasks.map((taskInDB) => {
-      const { id, task, by, credit, round } = taskInDB;
-      const acc = by.slice(0, 4) + "..." + by.slice(34);
+      const { id, task, claimedBy, project, amount, effectiveDate } = taskInDB;
+      //const acc = claimedBy.slice(0, 4) + "..." + claimedBy.slice(34);
+      if (projectName == "") {
+        setProjectName(project);
+      }
+      var subject = "<wallet address>";
+
       return (
         <div
           key={id}
           className={inter.className}
           style={{
-            padding: "20px",
+            padding: "5px",
             background: "white",
             borderRadius: "5px",
             margin: "10px 10px 0 0",
@@ -87,14 +114,42 @@ export default function Review() {
             width: "200px",
           }}
         >
-          <div style={{ fontWeight: "300" }}>Task:</div>
-          <div style={{ fontWeight: "600" }}>{task}</div>
-          <div style={{ fontWeight: "300" }}>Claimant:</div>
-          <div style={{ fontWeight: "600" }}>{acc}</div>
-          <div style={{ fontWeight: "300" }}>Credit:</div>
-          <div style={{ fontWeight: "600" }}>{credit}</div>
-          <div style={{ fontWeight: "300" }}>Round:</div>
-          <div style={{ fontWeight: "600" }}>{round}</div>
+          <div style={{ padding: "0px 2px 3px 0px", fontWeight: "300" }}>
+            Project:
+          </div>
+          <div style={{ padding: "0px 2px 10px 0px", fontWeight: "600" }}>
+            {projectName}
+          </div>
+          <div style={{ padding: "0px 2px 3px 0px", fontWeight: "300" }}>
+            Task:
+          </div>
+          <div style={{ padding: "0px 2px 10px 0px", fontWeight: "600" }}>
+            {task}
+          </div>
+          <div style={{ padding: "0px 2px 3px 0px", fontWeight: "300" }}>
+            Claimant:
+          </div>
+          <div style={{ padding: "0px 2px 10px 0px", fontWeight: "600" }}>
+            {claimedBy}
+          </div>
+          <div style={{ padding: "0px 2px 3px 0px", fontWeight: "300" }}>
+            Amount:
+          </div>
+          <div style={{ padding: "0px 2px 10px 0px", fontWeight: "600" }}>
+            {amount}
+          </div>
+          <div style={{ padding: "0px 2px 3px 0px", fontWeight: "300" }}>
+            Wallet:
+          </div>
+          <div
+            style={{ padding: "0px 2px 10px 0px", fontWeight: "600" }}
+          >{`<wallet address>`}</div>
+          <div style={{ padding: "0px 2px 3px 0px", fontWeight: "300" }}>
+            Effective Date:
+          </div>
+          <div style={{ padding: "0px 2px 10px 0px", fontWeight: "600" }}>
+            {effectiveDate}
+          </div>
           <div
             style={{
               paddingTop: "20px",
@@ -105,47 +160,88 @@ export default function Review() {
             <button
               className={styles.btn}
               onClick={async () => {
-                const compose = await getCompose(connection.selfID.did);
-
-                const variables = {
-                  claim: task,
-                  by,
-                  credit: Number(credit),
-                  round,
-                };
-
-                const composeDBResult = await compose.executeQuery(
-                  CREATE_CLAIM,
-                  variables
+                const confirmBox = window.confirm(
+                  `Confirm approval of full amount ${amount}`
                 );
+                if (confirmBox === true) {
+                  const compose = await getCompose(connection.selfID.did);
+                  //const effectiveDate = getEffectiveDate(round);
 
-                const dataStr = JSON.stringify(composeDBResult.data);
-                console.log(
-                  `Stream ID:  ${composeDBResult.data.createClaim.document.id}`
-                );
-                console.log(
-                  `Compose Result: ${JSON.stringify(composeDBResult.data)}`
-                );
+                  console.log(`Effective Date:  ${effectiveDate}`);
 
-                if (!composeDBResult.errors) {
-                  setMessage(
-                    `Approved and wrote Stream:  ${composeDBResult.data.createClaim.document.id}`
+                  // This is the "Approved" Claim
+                  const approvedVariables = {
+                    claim: task,
+                    subject: subject,
+                    amount: Number(credit),
+                    effective_date: effectiveDate,
+                    root_claim_id,
+                  };
+                  const approvedResponse = await createClaim(
+                    compose,
+                    approvedVariables
                   );
-                  setTasks(() => {
-                    console.log(
-                      `setTasks filtering task: ${task.id} using ID ${id}`
+                  if (approvedResponse.message == "SUCCESS") {
+                    root_claim_id = approvedResponse.streamID;
+                    console.log("ComposeDB Approved executeQuery complete");
+
+                    // This is the "Earned" Claim
+                    const earned_variables = {
+                      claim: task,
+                      subject: subject,
+                      amount: Number(credit),
+                      effective_date: effectiveDate,
+                      root_claim_id,
+                    };
+                    const earnedResponse = await createClaim(
+                      compose,
+                      earned_variables
                     );
-                    deleteTask(id);
-                    return tasks.filter((task) => task.id !== id);
-                  });
-                } else {
-                  setMessage(`Error:  ${composeDBResult.errors}`);
+                    if (earnedResponse.message == "SUCCESS") {
+                      setMessage(
+                        `Approved Stream:  ${approvedResponse.streamID} and Earned Stream: ${earnedResponse.streamID}`
+                      );
+
+                      setTasks(() => {
+                        updateUserStory(id);
+                        return tasks.filter((task) => task.id !== id);
+                      });
+                    } else {
+                      setMessage(
+                        `Approved Stream:  ${approvedResponse.streamID}. Failed on Earned Stream with error:  ${earnedResponse.message}`
+                      );
+                    }
+                  } else {
+                    setMessage(approvedResponse.message);
+                  }
                 }
 
                 // Make the claim in composedb
               }}
             >
               Approve
+            </button>
+          </div>
+          <div
+            style={{
+              paddingTop: "20px",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <button
+              className={styles.btn}
+              onClick={async () => {
+                // Distribute the funds to earned
+                const confirmBox = window.confirm(
+                  "Do you really want to distribute the claim?"
+                );
+                if (confirmBox === true) {
+                  handleDistributeClaim(task);
+                }
+              }}
+            >
+              Distribute
             </button>
           </div>
         </div>
@@ -160,7 +256,7 @@ export default function Review() {
           <div
             style={{ display: "flex", maxWidth: "1000px", flexWrap: "wrap" }}
           >
-            {tasksComponent}
+            <div>{tasksComponent}</div>
             <div
               style={{ margin: 10.0, padding: 10.0 }}
               className={inter.className}
