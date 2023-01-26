@@ -1,1 +1,4 @@
 task/prisma/dev.db
+node_modules
+wasm_results
+jobID.txt

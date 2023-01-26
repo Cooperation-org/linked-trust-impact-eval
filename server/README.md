@@ -1,21 +1,16 @@
 ## To run server example
+
 Open two terminals.
 
- In the first terminal cd into the server folder and run:
+Run:
 
 `npm install`
 `npm start`
 
-In the second terminal cd into the client folder and run:
+The react example can be opened on localhost:3000 and as its
+`useEffect` hook runs upon loading it will make the fetch call to the express server running on localhost:8000. There is a 30 second delay between the initial fetch and the returned response as this is about the length of time it takes for bacalhau to run the compute program/.
 
-`npm install`
-`npm start`
-
-
-The react example app will open on localhost:3000 and as its
-`componentWillMount()` function auto runs upon loading it will make the fetch call to the express server running on localhost:9000. There is a 30 second delay between the initial fetch and the returned response as this is about the length of time it takes for bacalhau to run the compute program/.
-
-All React relative code can be found in App.js under `componentWillMount()`
+All React relative code can be found in App.js under `useEffect` hook.
 
 On the server side you should see the data sent from react to express appear as a console.log() in the server terminal.
 Once bacalhau is done running a POST /bacalhau will show in the server terminal and the merkle root generated will be shown in the React fron end.
