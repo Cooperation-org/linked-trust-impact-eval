@@ -1,5 +1,6 @@
-task/prisma/dev.db
 task/test_data/cid1.json
 task/test_data/cid2.json
 task/test_data/cid3.json
 task/test_data/cid4.json
+task/.env
+.env

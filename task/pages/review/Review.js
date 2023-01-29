@@ -68,6 +68,7 @@ async function createClaim(compose, variables) {
     response.message = "SUCCESS";
   } else {
     response.message = `Error creating persisting ${composeDBResult.errors}`;
+    console.log(`review.js:createClaim - ERROR ${composeDBResult.errors}`);
   }
   return response;
 }
@@ -94,6 +95,7 @@ export default function Review() {
   let tasksComponent;
   console.log(`Review() - ENTRY`);
   if (tasks.length > 0) {
+    console.log("Tasks Entry >0");
     tasksComponent = tasks.map((taskInDB) => {
       const { id, task, claimedBy, project, amount, effectiveDate } = taskInDB;
       //const acc = claimedBy.slice(0, 4) + "..." + claimedBy.slice(34);
@@ -170,6 +172,7 @@ export default function Review() {
                   //const effectiveDate = getEffectiveDate(round);
 
                   console.log(`Effective Date:  ${effectiveDate}`);
+                  console.log("onClick setting approvedVariables");
 
                   // This is the "Approved" Claim
                   const approvedVariables = {
@@ -179,11 +182,13 @@ export default function Review() {
                     effective_date: effectiveDate,
                     root_claim_id,
                   };
+                  console.log("onClick 1");
                   const approvedResponse = await createClaim(
                     compose,
                     approvedVariables
                   );
                   if (approvedResponse.message == "SUCCESS") {
+                    console.log("Approved Review - Success!");
                     root_claim_id = approvedResponse.streamID;
                     console.log("ComposeDB Approved executeQuery complete");
 
@@ -200,6 +205,7 @@ export default function Review() {
                       earned_variables
                     );
                     if (earnedResponse.message == "SUCCESS") {
+                      console.log("Review Earned - Success!");
                       setMessage(
                         `Approved Stream:  ${approvedResponse.streamID} and Earned Stream: ${earnedResponse.streamID}`
                       );
@@ -214,6 +220,9 @@ export default function Review() {
                       );
                     }
                   } else {
+                    console.log(
+                      `onClick bad response: ${approvedResponse.errors}`
+                    );
                     setMessage(approvedResponse.message);
                   }
                 }

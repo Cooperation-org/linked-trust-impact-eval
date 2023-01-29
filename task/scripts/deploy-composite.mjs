@@ -5,7 +5,7 @@ import { Ed25519Provider } from "key-did-provider-ed25519";
 import { getResolver } from "key-did-resolver";
 import { fromString } from "uint8arrays/from-string";
 
-const compositeFileName = "claim-composite.json";
+const compositeFileName = "ie-claim-composite.json";
 const privateKey = fromString(
   "59e83c249b8947d1524a3f5f66326c78759c86d75573027e7bef571c3fddfb90",
   "base16"
