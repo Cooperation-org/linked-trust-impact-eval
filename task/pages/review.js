@@ -7,6 +7,14 @@ import { getCompose } from "../compose";
 
 const inter = Inter({ subsets: ["latin"] });
 
+const taskTobeInserted = {
+  claim: "A claim",
+  subject: "A subject",
+  root_claim_id: "k12.....",
+  amount: 2,
+  effective_date: new Date().toISOString(),
+};
+
 export const CREATE_CLAIM = `
   mutation (
     $claim: String!
@@ -63,6 +71,7 @@ async function updateUserStory(id) {
 async function createClaim(compose, variables) {
   const response = { message: "", streamID: "" };
   const composeDBResult = await compose.executeQuery(CREATE_CLAIM, variables);
+  console.log("composeDBResult >>>", composeDBResult);
   if (!composeDBResult.errors) {
     response.streamID = composeDBResult.data.createIEClaim.document.id;
     response.message = "SUCCESS";
@@ -78,18 +87,26 @@ function handleDistributeClaim(task) {
 }
 
 export default function Review() {
-  const [tasks, setTasks] = useState([]);
+  const [tasks, setTasks] = useState([
+    {
+      projectName: "A claim",
+      task: "A subject",
+      claimedBy: "someone",
+      amount: "100",
+      effectiveDate: new Date().toISOString(),
+    },
+  ]);
   const [connection] = useViewerConnection();
   const [message, setMessage] = useState("");
   const [projectName, setProjectName] = useState("");
 
-  useEffect(() => {
-    fetch("/api/taiga-user-story")
-      .then((res) => res.json())
-      .then((b) => {
-        setTasks(b.tasks);
-      });
-  }, []);
+  // useEffect(() => {
+  //   fetch("/api/taiga-user-story")
+  //     .then((res) => res.json())
+  //     .then((b) => {
+  //       setTasks(b.tasks);
+  //     });
+  // }, []);
 
   let tasksComponent;
   if (tasks.length > 0) {
@@ -164,7 +181,9 @@ export default function Review() {
                   `Confirm approval of full amount ${amount}`
                 );
                 if (confirmBox === true) {
+                  console.log(connection.selfID.did);
                   const compose = await getCompose(connection.selfID.did);
+                  console.log(compose);
                   //const effectiveDate = getEffectiveDate(round);
 
                   console.log(`Effective Date:  ${effectiveDate}`);
@@ -181,39 +200,40 @@ export default function Review() {
                     compose,
                     approvedVariables
                   );
-                  if (approvedResponse.message == "SUCCESS") {
-                    root_claim_id = approvedResponse.streamID;
-                    console.log("ComposeDB Approved executeQuery complete");
+                  console.log("approvedResponse >>>", approvedResponse);
+                  // if (approvedResponse.message == "SUCCESS") {
+                  //   root_claim_id = approvedResponse.streamID;
+                  //   console.log("ComposeDB Approved executeQuery complete");
 
-                    // This is the "Earned" Claim
-                    const earned_variables = {
-                      claim: task,
-                      subject: subject,
-                      amount: Number(credit),
-                      effective_date: effectiveDate,
-                      root_claim_id,
-                    };
-                    const earnedResponse = await createClaim(
-                      compose,
-                      earned_variables
-                    );
-                    if (earnedResponse.message == "SUCCESS") {
-                      setMessage(
-                        `Approved Stream:  ${approvedResponse.streamID} and Earned Stream: ${earnedResponse.streamID}`
-                      );
+                  //   // This is the "Earned" Claim
+                  //   const earned_variables = {
+                  //     claim: task,
+                  //     subject: subject,
+                  //     amount: Number(credit),
+                  //     effective_date: effectiveDate,
+                  //     root_claim_id,
+                  //   };
+                  //   const earnedResponse = await createClaim(
+                  //     compose,
+                  //     earned_variables
+                  //   );
+                  //   if (earnedResponse.message == "SUCCESS") {
+                  //     setMessage(
+                  //       `Approved Stream:  ${approvedResponse.streamID} and Earned Stream: ${earnedResponse.streamID}`
+                  //     );
 
-                      setTasks(() => {
-                        updateUserStory(id);
-                        return tasks.filter((task) => task.id !== id);
-                      });
-                    } else {
-                      setMessage(
-                        `Approved Stream:  ${approvedResponse.streamID}. Failed on Earned Stream with error:  ${earnedResponse.message}`
-                      );
-                    }
-                  } else {
-                    setMessage(approvedResponse.message);
-                  }
+                  //     setTasks(() => {
+                  //       updateUserStory(id);
+                  //       return tasks.filter((task) => task.id !== id);
+                  //     });
+                  //   } else {
+                  //     setMessage(
+                  //       `Approved Stream:  ${approvedResponse.streamID}. Failed on Earned Stream with error:  ${earnedResponse.message}`
+                  //     );
+                  //   }
+                  // } else {
+                  //   setMessage(approvedResponse.message);
+                  // }
                 }
 
                 // Make the claim in composedb

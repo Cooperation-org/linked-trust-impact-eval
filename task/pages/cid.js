@@ -5,19 +5,45 @@ import { Inter } from "@next/font/google";
 const inter = Inter({ subsets: ["latin"] });
 
 async function getCID(streamID) {
-  try {
-    const response = await fetch("/api/cid", {
-      method: "POST",
-      body: JSON.stringify(streamID),
-    });
+  // try {
+  console.log("Requesting CID");
+  const response = await fetch("/api/cid", {
+    method: "POST",
+    body: JSON.stringify({ streamID }),
+  });
 
-    //return response.json({ response });
-    return response.json();
-  } catch (err) {
-    console.log(`getCID ERROR: - ${err}`);
-    throw new Error("Unable to retrieve stream");
+  console.log("This is the response from the api call", response);
+  if (!response.ok) {
+    throw new Error(response.statusText);
   }
+
+  return await response.json();
+  //   const response = await fetch("/api/cid", {
+  //     method: "POST",
+  //     body: JSON.stringify(streamID),
+  //   });
+  //   console.log("Reached line 14");
+  //   console.log("response.json() >>>", response);
+
+  //   //return response.json({ response });
+  //   return response.json();
+  // } catch (err) {
+  //   console.log("Entered error block");
+  //   console.log(`getCID ERROR: - ${err}`);
+  //   throw new Error("Unable to retrieve stream");
+  // }
 }
+
+// const response = await fetch("/api/tasks", {
+//   method: "POST",
+//   body: JSON.stringify(task),
+// });
+
+// if (!response.ok) {
+//   throw new Error(response.statusText);
+// }
+
+// return await response.json();
 
 export default function Cid(props) {
   //const [connection] = useViewerConnection();
@@ -50,6 +76,7 @@ export default function Cid(props) {
 
                   try {
                     const response = await getCID(streamID);
+                    console.log("Result from CID request", response);
                     setStreamCID(JSON.stringify(response, null, 2));
                     setMessage(`Retrieved CID for Stream ${streamID}`);
                     setStreamID("");
