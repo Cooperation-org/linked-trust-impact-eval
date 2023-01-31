@@ -9,13 +9,36 @@ const inter = Inter({ subsets: ["latin"] });
 
 async function getCID(streamID) {
   try {
+    /*
     const response = await fetch("/api/cid", {
       method: "POST",
       body: JSON.stringify(streamID),
     });
+    console.log("Get CID Returned");
+    */
+
+    fetch("/api/cid", {
+      method: "POST",
+      body: JSON.stringify(streamID),
+    })
+      .then((res) => res.json())
+      .then((b) => {
+        console.log(`b.cid:  ${JSON.stringify(b)}`);
+        return b.cid;
+      });
 
     //return response.json({ response });
-    return response.json();
+    //return response.json();
+    //console.log(`getCID:  Response:  ${JSON.stringify(response)}`);
+    //console.log(`getting json`);
+    //const myjson = response.json.Cid;
+
+    //console.log(
+    //  `getCID response stringified after getting in json format:  ${JSON.stringify(
+    //    response
+    //  )}`
+    //);
+    //return response;
   } catch (err) {
     console.log(`getCID ERROR: - ${err}`);
     throw new Error("Unable to retrieve stream");
@@ -33,7 +56,7 @@ export default function Cid(props) {
     <main className={styles.claimMain}>
       {
         //<div style={{ display: "flex" }} className={inter.className}>
-        <div className={styles.grid}>
+        <div className={styles.grid} style={{ margin: "60px 5px 0px 70px" }}>
           <form className={styles.claimForm}>
             <label htmlFor="streamID">StreamID: </label>
             <input
@@ -53,8 +76,16 @@ export default function Cid(props) {
                   }
 
                   try {
-                    const response = await getCID(streamID);
-                    setStreamCID(JSON.stringify(response, null, 2));
+                    fetch("/api/cid", {
+                      method: "POST",
+                      body: JSON.stringify(streamID),
+                    })
+                      .then((res) => res.json())
+                      .then((b) => {
+                        console.log(`CID Page b.cid:  ${JSON.stringify(b)}`);
+                        setStreamCID(JSON.stringify(b.cid));
+                      });
+
                     setMessage(`Retrieved CID for Stream ${streamID}`);
                     setStreamID("");
                   } catch (err) {
@@ -62,7 +93,7 @@ export default function Cid(props) {
                   }
                 }}
                 className={styles.btn}
-                style={{ fontSize: "16px", marginTop: "20px" }}
+                style={{ fontSize: "16px", margin: "15px 0px 0px 400px" }}
               >
                 Get CID
               </button>

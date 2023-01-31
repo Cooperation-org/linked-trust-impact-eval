@@ -3,29 +3,71 @@ const PROJECT_ID = process.env.TAIGA_PROJECT_ID;
 
 export default async function handler(req, res) {
   if (req.method == "GET") {
-    const response = await fetch(
-      `https://taiga.whatscookin.us/api/v1/userstories?project=${PROJECT_ID}&status__is_closed=true`,
-
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${TOKEN}`,
-        },
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(response.statusText);
-    }
-    const taigaUserStoryList = await response.json();
-    const userStoryList = getModel(taigaUserStoryList);
-    return res.status(200).json(userStoryList);
+    const userStoryList = await getTaigaUserStory();
+    //console.log(`UserStoryList: ${JSON.stringify(userStoryList)}`);
+    const projectDetail = await getTaigaProject();
+    //console.log(
+    //  `taiga-user-story:handler - projectDetail length:  ${projectDetail.users.length}`
+    //);
+    const reviewDetail = { projectDetail, userStoryList };
+    //console.log(`reviewDetail:  ${JSON.stringify(reviewDetail)}`);
+    return res.status(200).json(reviewDetail);
   } else {
     return res.status(500).json("{message: not supported");
   }
 }
-function getModel(taigaUserStoryList) {
+
+// Call the Taiga API to retrieve closed user stories for the project
+async function getTaigaUserStory() {
+  const response = await fetch(
+    `https://taiga.whatscookin.us/api/v1/userstories?project=${PROJECT_ID}&status__is_closed=true`,
+
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${TOKEN}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+  const taigaUserStoryList = await response.json();
+  const userStoryList = getTaskModel(taigaUserStoryList);
+  return userStoryList;
+}
+
+// Call the Taiga API to retrieve closed user stories for the project
+async function getTaigaProject() {
+  const response = await fetch(
+    `https://taiga.whatscookin.us/api/v1/projects/${PROJECT_ID}`,
+
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${TOKEN}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+  const taigaUserProject = await response.json();
+  const projectDetail = getProjectModel(taigaUserProject);
+  console.log(
+    `taiga-user-story:getTaigaProject - project name: ${projectDetail.name}`
+  );
+  console.log(
+    `taiga-user-story:getTaigaProject - member length: ${projectDetail.users.length}`
+  );
+  return projectDetail;
+}
+
+function getTaskModel(taigaUserStoryList) {
   var userStoryList = {
     tasks: [],
   };
@@ -47,6 +89,30 @@ function getModel(taigaUserStoryList) {
   }
 
   return userStoryList;
+}
+
+function getProjectModel(taigaProjectDetail) {
+  var projectDetail = {
+    users: [],
+  };
+
+  projectDetail.name = taigaProjectDetail.name;
+
+  // Get the members for this project
+  var taigaMemberList = taigaProjectDetail.members;
+  for (let i = 0; i < taigaMemberList.length; i++) {
+    projectDetail.users[i] = {
+      id: taigaMemberList[i].id,
+      roleName: taigaMemberList[i].role_name,
+      fullName: taigaMemberList[i].full_name,
+      fullNameDisplay: taigaMemberList[i].full_name_display,
+      userName: taigaMemberList[i].username,
+      photo: taigaMemberList[i].photo,
+      walletAddress: "",
+    };
+  }
+
+  return projectDetail;
 }
 
 function getPoints(pointsList) {

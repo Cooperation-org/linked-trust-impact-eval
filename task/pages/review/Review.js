@@ -80,6 +80,7 @@ function handleDistributeClaim(task) {
 
 export default function Review() {
   const [tasks, setTasks] = useState([]);
+  const [users, setUsers] = useState([]);
   const [connection] = useViewerConnection();
   const [message, setMessage] = useState("");
   const [projectName, setProjectName] = useState("");
@@ -88,7 +89,9 @@ export default function Review() {
     fetch("/api/taiga-user-story")
       .then((res) => res.json())
       .then((b) => {
-        setTasks(b.tasks);
+        //setTasks(b.tasks);
+        setTasks(b.userStoryList.tasks);
+        setUsers(b.projectDetail.users);
       });
   }, []);
 
