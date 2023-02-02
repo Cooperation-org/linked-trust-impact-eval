@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import styles from "../../styles/Home.module.css";
+import styles from "../../styles/Review.module.css";
 import { Inter } from "@next/font/google";
 import Head from "next/head";
 import { useViewerConnection } from "@self.id/framework";
@@ -42,6 +42,7 @@ const task = "";
 const by = "";
 const credit = 0;
 const round = "";
+const memberVal = "";
 var root_claim_id = " ";
 
 async function updateUserStory(id) {
@@ -72,15 +73,13 @@ async function createClaim(compose, variables) {
   }
   return response;
 }
-function handleDistributeClaim(task) {
-  // TODO Implment this.  It should launch a new page to handle splitting
-  // a claim distribution.
-  console.log("handleDistributeClaim - ENTRY");
-}
 
 export default function Review() {
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
+  const [showDistributeTo, setShowDistributeTo] = useState(0);
+  const [distributedAmount, setDistributedAmt] = useState(0);
+  const [distributedAmts, setDistributedAmts] = useState([]);
   const [connection] = useViewerConnection();
   const [message, setMessage] = useState("");
   const [projectName, setProjectName] = useState("");
@@ -89,74 +88,159 @@ export default function Review() {
     fetch("/api/taiga-user-story")
       .then((res) => res.json())
       .then((b) => {
-        //setTasks(b.tasks);
         setTasks(b.userStoryList.tasks);
         setUsers(b.projectDetail.users);
       });
   }, []);
 
   let tasksComponent;
-  console.log(`Review() - ENTRY`);
+  let distributeComponents;
+
+  let buttonRow;
+  let commitButton;
+
   if (tasks.length > 0) {
-    console.log("Tasks Entry >0");
     tasksComponent = tasks.map((taskInDB) => {
       const { id, task, claimedBy, project, amount, effectiveDate } = taskInDB;
       //const acc = claimedBy.slice(0, 4) + "..." + claimedBy.slice(34);
       if (projectName == "") {
         setProjectName(project);
       }
+      distributeComponents = <p></p>;
       var subject = "<wallet address>";
+      if (id === showDistributeTo) {
+        // build the option element for each user
+        let optionsArray = [];
+        for (let i = 0; i < users.length; i++) {
+          optionsArray[i] = (
+            <option key={i} value={users[i].fullNameDisplay}>
+              {users[i].fullNameDisplay}
+            </option>
+          );
+        }
+        if (distributedAmts.length === 0) {
+          console.log(`DistributedAmts length === 0`);
+          setDistributedAmts([{ member: claimedBy, amount: amount }]);
+        } else {
+          console.log(
+            `DistributedAmts[0] amount:  ${distributedAmts[0].amount}`
+          );
+          //}
 
-      return (
-        <div
-          key={id}
-          className={inter.className}
-          style={{
-            padding: "5px",
-            background: "white",
-            borderRadius: "5px",
-            margin: "15px 10px 100px 100px",
-            boxShadow: "1px 1px 2px rgba(0, 0, 0, .25)",
-            width: "200px",
-          }}
-        >
-          <div style={{ padding: "0px 2px 3px 0px", fontWeight: "300" }}>
-            Project:
-          </div>
-          <div style={{ padding: "0px 2px 10px 0px", fontWeight: "600" }}>
-            {projectName}
-          </div>
+          let memberDistributionRow = (
+            <div>
+              <span
+                style={{
+                  fontSize: "small",
+                  fontWeight: "bold",
+                  padding: "0px 2px 2px 0px",
+                }}
+              >
+                <select
+                  name="member"
+                  value={memberVal}
+                  onChange={(e) => {
+                    console.log(`Target Value:  ${e.target.value}`);
+                  }}
+                >
+                  <>{optionsArray}</>
+                </select>
+              </span>
+              <span
+                style={{
+                  fontSize: "small",
+                  fontWeight: "bold",
+                  padding: "0px 2px 2px 300px",
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="Amount"
+                  name="amount"
+                  value={distributedAmts[0].amount}
+                  onChange={(e) => {
+                    console.log(
+                      `save the amount and ensure the total doesn't exceed the task amount`
+                    );
+                    console.log(`cumulative amount ${e.target.value}`);
 
-          <div style={{ padding: "0px 2px 3px 0px", fontWeight: "300" }}>
-            Task:
-          </div>
-          <div style={{ padding: "0px 2px 10px 0px", fontWeight: "600" }}>
-            {task}
-          </div>
-          <div style={{ padding: "0px 2px 3px 0px", fontWeight: "300" }}>
-            Claimant:
-          </div>
-          <div style={{ padding: "0px 2px 10px 0px", fontWeight: "600" }}>
-            {claimedBy}
-          </div>
-          <div style={{ padding: "0px 2px 3px 0px", fontWeight: "300" }}>
-            Amount:
-          </div>
-          <div style={{ padding: "0px 2px 10px 0px", fontWeight: "600" }}>
-            {amount}
-          </div>
-          <div style={{ padding: "0px 2px 3px 0px", fontWeight: "300" }}>
-            Wallet:
-          </div>
-          <div
-            style={{ padding: "0px 2px 10px 0px", fontWeight: "600" }}
-          >{`<wallet address>`}</div>
-          <div style={{ padding: "0px 2px 3px 0px", fontWeight: "300" }}>
-            Effective Date:
-          </div>
-          <div style={{ padding: "0px 2px 10px 0px", fontWeight: "600" }}>
-            {effectiveDate}
-          </div>
+                    //setDistributedAmts([...CurrentDistAmts, e.target.value]);
+                  }}
+                />
+              </span>
+              <div style={{ padding: "0px 2px 5px 200px" }}>
+                <button
+                  className={styles.btn}
+                  onClick={
+                    async () => {
+                      console.log("clicked");
+                    }
+
+                    // Make the claim in composedb
+                  }
+                >
+                  Commit
+                </button>
+              </div>
+            </div>
+          );
+
+          // build distribute components
+          distributeComponents = (
+            <div>
+              <div
+                style={{
+                  fontSize: "medium",
+                  fontWeight: "bold",
+                  padding: "0px 2px 15px 100px",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "medium",
+                    fontWeight: "bold",
+                    padding: "0px 2px 20px 0px",
+                  }}
+                >
+                  Remaining funds to be distributed:
+                </span>
+                <span
+                  style={{
+                    fontSize: "medium",
+                    fontWeight: "bold",
+                    padding: "0px 2px 20px 20px",
+                  }}
+                >
+                  {distributedAmount}
+                </span>
+              </div>
+              <div>
+                <span
+                  style={{
+                    fontSize: "large",
+                    fontWeight: "bold",
+                    padding: "0px 2px 15px 50px",
+                  }}
+                >
+                  Member
+                </span>
+                <span
+                  style={{
+                    fontSize: "large",
+                    fontWeight: "bold",
+                    padding: "0px 2px 2px 400px",
+                  }}
+                >
+                  Amount
+                </span>
+              </div>
+              {memberDistributionRow}
+            </div>
+          );
+        }
+      } else {
+        // Add button row
+        buttonRow = (
           <div
             style={{
               paddingTop: "20px",
@@ -164,99 +248,179 @@ export default function Review() {
               justifyContent: "center",
             }}
           >
-            <button
-              className={styles.btn}
-              onClick={async () => {
-                const confirmBox = window.confirm(
-                  `Confirm approval of full amount ${amount}`
-                );
-                if (confirmBox === true) {
-                  const compose = await getCompose(connection.selfID.did);
-                  //const effectiveDate = getEffectiveDate(round);
-
-                  console.log(`Effective Date:  ${effectiveDate}`);
-                  console.log("onClick setting approvedVariables");
-
-                  // This is the "Approved" Claim
-                  const approvedVariables = {
-                    claim: task,
-                    subject: subject,
-                    amount: Number(credit),
-                    effective_date: effectiveDate,
-                    root_claim_id,
-                  };
-                  console.log("onClick 1");
-                  const approvedResponse = await createClaim(
-                    compose,
-                    approvedVariables
+            <span style={{ padding: "0px 2px 3px 0px" }}>
+              <button
+                className={styles.btn}
+                onClick={async () => {
+                  const confirmBox = window.confirm(
+                    `Confirm approval of full amount ${amount}`
                   );
-                  if (approvedResponse.message == "SUCCESS") {
-                    console.log("Approved Review - Success!");
-                    root_claim_id = approvedResponse.streamID;
-                    console.log("ComposeDB Approved executeQuery complete");
+                  if (confirmBox === true) {
+                    const compose = await getCompose(connection.selfID.did);
+                    //const effectiveDate = getEffectiveDate(round);
 
-                    // This is the "Earned" Claim
-                    const earned_variables = {
+                    console.log(`Effective Date:  ${effectiveDate}`);
+                    console.log("onClick setting approvedVariables");
+
+                    // This is the "Approved" Claim
+                    const approvedVariables = {
                       claim: task,
                       subject: subject,
                       amount: Number(credit),
                       effective_date: effectiveDate,
                       root_claim_id,
                     };
-                    const earnedResponse = await createClaim(
+                    console.log("onClick 1");
+                    const approvedResponse = await createClaim(
                       compose,
-                      earned_variables
+                      approvedVariables
                     );
-                    if (earnedResponse.message == "SUCCESS") {
-                      console.log("Review Earned - Success!");
-                      setMessage(
-                        `Approved Stream:  ${approvedResponse.streamID} and Earned Stream: ${earnedResponse.streamID}`
-                      );
+                    if (approvedResponse.message == "SUCCESS") {
+                      console.log("Approved Review - Success!");
+                      root_claim_id = approvedResponse.streamID;
+                      console.log("ComposeDB Approved executeQuery complete");
 
-                      setTasks(() => {
-                        updateUserStory(id);
-                        return tasks.filter((task) => task.id !== id);
-                      });
+                      // This is the "Earned" Claim
+                      const earned_variables = {
+                        claim: task,
+                        subject: subject,
+                        amount: Number(credit),
+                        effective_date: effectiveDate,
+                        root_claim_id,
+                      };
+                      const earnedResponse = await createClaim(
+                        compose,
+                        earned_variables
+                      );
+                      if (earnedResponse.message == "SUCCESS") {
+                        console.log("Review Earned - Success!");
+                        setMessage(
+                          `Approved Stream:  ${approvedResponse.streamID} and Earned Stream: ${earnedResponse.streamID}`
+                        );
+
+                        setTasks(() => {
+                          updateUserStory(id);
+                          return tasks.filter((task) => task.id !== id);
+                        });
+                      } else {
+                        setMessage(
+                          `Approved Stream:  ${approvedResponse.streamID}. Failed on Earned Stream with error:  ${earnedResponse.message}`
+                        );
+                      }
                     } else {
-                      setMessage(
-                        `Approved Stream:  ${approvedResponse.streamID}. Failed on Earned Stream with error:  ${earnedResponse.message}`
+                      console.log(
+                        `onClick bad response: ${approvedResponse.errors}`
                       );
+                      setMessage(approvedResponse.message);
                     }
-                  } else {
-                    console.log(
-                      `onClick bad response: ${approvedResponse.errors}`
-                    );
-                    setMessage(approvedResponse.message);
                   }
-                }
 
-                // Make the claim in composedb
-              }}
-            >
-              Approve
-            </button>
+                  // Make the claim in composedb
+                }}
+              >
+                Approve
+              </button>
+            </span>
+            <span style={{ padding: "0px 2px 3px 0px" }}>
+              <button
+                className={styles.btn}
+                onClick={async () => {
+                  setShowDistributeTo(id);
+                }}
+              >
+                Distribute
+              </button>
+            </span>
           </div>
+        );
+      }
+
+      return (
+        <div
+          key={id}
+          style={{
+            padding: "5px",
+            background: "white",
+            borderRadius: "5px",
+            fontSize: "small",
+            margin: "15px 10px 100px 100px",
+            boxShadow: "1px 1px 2px rgba(0, 0, 0, .25)",
+            width: "800px",
+          }}
+        >
           <div
             style={{
-              paddingTop: "20px",
-              display: "flex",
-              justifyContent: "center",
+              fontSize: "large",
+              fontWeight: 600,
+              padding: "0px 2px 30px 0px",
             }}
           >
-            <button
-              className={styles.btn}
-              onClick={async () => {
-                // Distribute the funds to earned
-                const confirmBox = window.confirm(
-                  "Do you really want to distribute the claim?"
-                );
-                if (confirmBox === true) {
-                  handleDistributeClaim(task);
-                }
+            <span
+              style={{
+                fontSize: "large",
+                fontWeight: "bold",
+                padding: "0px 2px 2px 0px",
               }}
             >
-              Pay Earned
-            </button>
+              {"Task:  "}
+            </span>
+            <span
+              style={{
+                fontSize: "large",
+                fontWeight: 600,
+                padding: "0px 2px 2px 0px",
+              }}
+            >
+              {" "}
+              {task}
+            </span>
+
+            <span
+              style={{
+                fontSize: "large",
+                fontWeight: "bold",
+                padding: "0px 2px 2px 400px",
+              }}
+            >
+              Amount:
+            </span>
+            <span
+              syle={{
+                fontSize: "large",
+                fontWeight: 600,
+                padding: "0px 2px 200px 0px",
+              }}
+            >
+              {" "}
+              {amount}
+            </span>
+          </div>
+
+          <div>
+            <span style={{ fontSize: "small", fontWeight: "bold" }}>
+              {"Project:   "}
+            </span>
+            <span syle={{ fontSize: "small" }}>{projectName}</span>
+          </div>
+
+          <div style={{ padding: "0px 2px 3px 0px" }}>
+            <span style={{ fontWeight: "bold" }}>Claimant:</span>
+            <span syle={{ fontWeight: 600 }}> {claimedBy}</span>
+          </div>
+
+          <div style={{ padding: "0px 2px 3px 0px" }}>
+            <span style={{ fontWeight: "bold" }}>Wallet:</span>
+            <span syle={{ fontWeight: 600 }}> {`<wallet address>`}</span>
+          </div>
+
+          <div style={{ padding: "0px 2px 3px 0px" }}>
+            <span style={{ fontWeight: "bold" }}>Effective Date:</span>
+            <span syle={{ fontWeight: 600 }}> {effectiveDate}</span>
+          </div>
+
+          <div>{buttonRow}</div>
+          <div>
+            <div>{distributeComponents}</div>
           </div>
         </div>
       );
@@ -274,16 +438,15 @@ export default function Review() {
         <h1 className={styles.title}> Review page </h1>
       </div>
 
-      <main className={styles.main}>
+      <main>
         {connection.status === "connected" && (
-          <div className="grid grid-cols-3 gap-4 p-5">
+          <div>
             <div>{tasksComponent}</div>
             <div
               style={{
                 margin: 0.0,
                 padding: 10.0,
               }}
-              className={inter.className}
             >
               <p></p>
               <p>{message}</p>

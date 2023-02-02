@@ -77,6 +77,8 @@ function getTaskModel(taigaUserStoryList) {
     const pointsFactor = process.env.TAIGA_POINTS_FACTOR;
     const claimAmount = (pointsFactor * summedPoints).toFixed(2);
 
+    console.log(`Task ID:  ${taigaUserStoryList[i].id}`);
+
     userStoryList.tasks[i] = {
       id: taigaUserStoryList[i].id,
       task: taigaUserStoryList[i].subject,
