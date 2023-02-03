@@ -1,6 +1,7 @@
 .title {
   font-family: Roboto, sans-serif;
   font-weight: 400;
+  padding: 12px 400px;
 }
 .paragraf {
   font-family: Roboto, sans-serif;
@@ -19,6 +20,13 @@
   font-size: 16px;
   border: none;
   cursor: pointer;
+}
+.disabledbtn {
+  background-color: #5d6062;
+  color: purple;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
 }
 .dropbtn {
   background-color: #3498db;

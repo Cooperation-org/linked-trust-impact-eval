@@ -87,6 +87,10 @@ function getTaskModel(taigaUserStoryList) {
       claimedBy: taigaUserStoryList[i].assigned_to_extra_info.username,
       project: taigaUserStoryList[i].project_extra_info.name,
       amount: claimAmount,
+      taskStatus: "Needs Approval",
+      approvedAmount: 0,
+      distributedAmount: 0,
+      message: "",
     };
   }
 
