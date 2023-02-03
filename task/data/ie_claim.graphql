@@ -11,7 +11,10 @@ type IEClaim
   root_claim_id: String @string(minLength: 1, maxLength: 1024)
   amount: Int
   amountUnits: String @string(minLength: 1, maxLength: 16)
-  effective_date: String! @string(minLength: 1, maxLength: 10)
+  """
+  effective_date = time in seconds since epoch
+  """
+  effective_date: Int!
   statement: String @string(minLength: 1, maxLength: 16384)
   source: String @string(minLength: 1, maxLength: 1024)
   digestMultibase: String @string(minLength: 1, maxLength: 256)
@@ -22,4 +25,9 @@ type IEClaim
   rating: Float @float(min: -1, max: 1)
   intendedAudience: String @string(minLength: 1, maxLength: 256)
   respondAt: String @string(minLength: 1, maxLength: 1024)
+
+  """
+  claim_satisfaction_status = "unsatisfied" | "pending" | "satisfied"
+  """
+  claim_satisfaction_status: String @string(minLength: 1, maxLength: 256)
 }

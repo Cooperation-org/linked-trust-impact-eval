@@ -11,18 +11,22 @@ export const CREATE_CLAIM = `
   mutation (
     $claim: String!
     $subject: String!
-    $root_claim_id: String
+    $rootClaimId: String
     $amount: Int
-    $effective_date: String!
+    $amountUnits: String
+    $effectiveDate: Int!
+    $claimSatisfactionStatus: String!
   ){
     createIEClaim(
       input: {
         content: {
           claim: $claim
           subject: $subject
-          root_claim_id: $root_claim_id
+          rootClaimId: $rootClaimId
           amount: $amount
-          effective_date: $effective_date
+          amountUnits: $amountUnits
+          effectiveDate: $effectiveDate
+          claimSatisfactionStatus: $claimSatisfactionStatus
         }
       }
     ){
@@ -31,8 +35,10 @@ export const CREATE_CLAIM = `
         claim
         subject
         amount
-        root_claim_id
-        effective_date
+        amountUnits
+        rootClaimId
+        effectiveDate
+        claimSatisfactionStatus
       }
     }
   }
@@ -42,7 +48,7 @@ const task = "";
 const by = "";
 const credit = 0;
 const round = "";
-var root_claim_id = " ";
+// var root_claim_id = " ";
 
 async function updateUserStory(id) {
   /*
@@ -94,12 +100,24 @@ export default function Review() {
   let tasksComponent;
   if (tasks.length > 0) {
     tasksComponent = tasks.map((taskInDB) => {
-      const { id, task, claimedBy, project, amount, effectiveDate } = taskInDB;
+      const {
+        subject,
+        id,
+        task,
+        claimedBy,
+        project,
+        rootClaimId,
+        amount,
+        amountUnits,
+        effectiveDate,
+        claimSatisfactionStatus,
+      } = taskInDB;
+
       //const acc = claimedBy.slice(0, 4) + "..." + claimedBy.slice(34);
       if (projectName == "") {
         setProjectName(project);
       }
-      var subject = "<wallet address>";
+      // var subject = "<wallet address>";
 
       return (
         <div
@@ -167,53 +185,56 @@ export default function Review() {
                   const compose = await getCompose(connection.selfID.did);
                   //const effectiveDate = getEffectiveDate(round);
 
-                  console.log(`Effective Date:  ${effectiveDate}`);
-
                   // This is the "Approved" Claim
-                  const approvedVariables = {
+                  let approvedVariables = {
                     claim: task,
-                    subject: subject,
-                    amount: Number(credit),
-                    effective_date: effectiveDate,
-                    root_claim_id,
+                    subject,
+                    amount: Number(amount),
+                    amountUnits,
+                    effectiveDate,
+                    claimSatisfactionStatus,
                   };
+                  if (rootClaimId) {
+                    approvedVariables = { ...approvedVariables, rootClaimId };
+                  }
                   const approvedResponse = await createClaim(
                     compose,
                     approvedVariables
                   );
-                  if (approvedResponse.message == "SUCCESS") {
-                    root_claim_id = approvedResponse.streamID;
-                    console.log("ComposeDB Approved executeQuery complete");
+                  // if (approvedResponse.message == "SUCCESS") {
+                  //   root_claim_id = approvedResponse.streamID;
+                  //   console.log("ComposeDB Approved executeQuery complete");
 
-                    // This is the "Earned" Claim
-                    const earned_variables = {
-                      claim: task,
-                      subject: subject,
-                      amount: Number(credit),
-                      effective_date: effectiveDate,
-                      root_claim_id,
-                    };
-                    const earnedResponse = await createClaim(
-                      compose,
-                      earned_variables
-                    );
-                    if (earnedResponse.message == "SUCCESS") {
-                      setMessage(
-                        `Approved Stream:  ${approvedResponse.streamID} and Earned Stream: ${earnedResponse.streamID}`
-                      );
+                  //   // This is the "Earned" Claim
+                  //   const earned_variables = {
+                  //     claim: task,
+                  //     subject: subject,
+                  //     amount: Number(credit),
+                  //     effective_date: effectiveDate,
+                  //     root_claim_id,
+                  //     claim_satisfaction_status,
+                  //   };
+                  //   const earnedResponse = await createClaim(
+                  //     compose,
+                  //     earned_variables
+                  //   );
+                  //   if (earnedResponse.message == "SUCCESS") {
+                  //     setMessage(
+                  //       `Approved Stream:  ${approvedResponse.streamID} and Earned Stream: ${earnedResponse.streamID}`
+                  //     );
 
-                      setTasks(() => {
-                        updateUserStory(id);
-                        return tasks.filter((task) => task.id !== id);
-                      });
-                    } else {
-                      setMessage(
-                        `Approved Stream:  ${approvedResponse.streamID}. Failed on Earned Stream with error:  ${earnedResponse.message}`
-                      );
-                    }
-                  } else {
-                    setMessage(approvedResponse.message);
-                  }
+                  //     setTasks(() => {
+                  //       updateUserStory(id);
+                  //       return tasks.filter((task) => task.id !== id);
+                  //     });
+                  //   } else {
+                  //     setMessage(
+                  //       `Approved Stream:  ${approvedResponse.streamID}. Failed on Earned Stream with error:  ${earnedResponse.message}`
+                  //     );
+                  //   }
+                  // } else {
+                  //   setMessage(approvedResponse.message);
+                  // }
                 }
 
                 // Make the claim in composedb

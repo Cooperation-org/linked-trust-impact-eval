@@ -3,7 +3,7 @@ import { serveEncodedDefinition } from "@composedb/devtools-node";
 const server = await serveEncodedDefinition({
   ceramicURL: "http://localhost:7007",
   graphiql: true,
-  path: new URL("../claim-composite.json", import.meta.url),
+  path: new URL("../ie-claim-composite.json", import.meta.url),
   port: 5001,
 });
 
