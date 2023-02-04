@@ -1,0 +1,35 @@
+{
+  "limit": 2000,
+  "claims": [
+    {
+      "claim": "Root",
+      "amount": 100,
+      "subject": "",
+      "amountUnits": "ETH",
+      "rootClaimId": "kjzl6kcym7w8y5u49e724s7wh1j7zxch9ikwcy5klwe9tfhet8t894cqkvnjw3p",
+      "effectiveDate": 1675433476,
+      "claimSatisfactionStatus": "unsatisfied",
+      "id": "kjzl6kcym7w8y5u49e724s7wh1j7zxch9ikwcy5klwe9tfhet8t894cqkvnjw3p"
+    },
+    {
+      "claim": "A subject",
+      "amount": 75,
+      "subject": "0x317F6BB70819384c2944f8f8EFa049a983c5ad02",
+      "amountUnits": "ETH",
+      "rootClaimId": "kjzl6kcym7w8y5u49e724s7wh1j7zxch9ikwcy5klwe9tfhet8t894cqkvnjw3p",
+      "effectiveDate": 1675433754,
+      "claimSatisfactionStatus": "unsatisfied",
+      "id": "kjzl6kcym7w8yafti6zxio5r9mtdqhowfz7so3zw1bedeepy0n5a0vy13rbkn03"
+    },
+    {
+      "claim": "A subject",
+      "amount": 25,
+      "subject": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
+      "amountUnits": "ETH",
+      "rootClaimId": "kjzl6kcym7w8y5u49e724s7wh1j7zxch9ikwcy5klwe9tfhet8t894cqkvnjw3p",
+      "effectiveDate": 1675433754,
+      "claimSatisfactionStatus": "unsatisfied",
+      "id": "kjzl6kcym7w8ya7jhwkscslp9bopteordsemzu9uuq8b78ys11c00rie41hsg86"
+    }
+  ]
+}

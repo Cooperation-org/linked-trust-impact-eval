@@ -1,25 +1,18 @@
 test1.json : QmSCMeGh17KJWA9VHPftWqA1xdWM7McVtt3azxH3aenp1X
 test2.json : QmZhCRWWv8x6zJKhUKwnDNzerWoUaAjyeD4aSY8tGz6qE4
 test3.json : QmT3sHvzDBV53WqY2Z2Gt5U9zFPZYHKHMSKghbbkxt3zsM
+claim.jsom : QmTFcE6qwbpN5YozkR7u8yztZGYYjAztuxeF3VQMpAJwh1
 
-## Bacalhau rust run command:
-cargo run "1000" ./jsons/test1.json ./jsons/test2.json ./jsons/test3.json
 
-## Bacalhau WASM/WASI run command:
+## Updated Bacalhau rust run command:
+cargo run  ./jsons/claim.json
 
-bacalhau wasm run ./target/wasm32-wasi/release/bacalhau_compute.wasm -v QmSCMeGh17KJWA9VHPftWqA1xdWM7McVtt3azxH3aenp1X:CID1 -v QmZhCRWWv8x6zJKhUKwnDNzerWoUaAjyeD4aSY8tGz6qE4:CID2 -v QmT3sHvzDBV53WqY2Z2Gt5U9zFPZYHKHMSKghbbkxt3zsM:CID3 1000 CID1 CID2 CID3 | tee jobID.txt
+
+## Updated Bacalhau WASM/WASI run command:
+bacalhau wasm run ./bacalhau_compute.wasm -v QmTFcE6qwbpN5YozkR7u8yztZGYYjAztuxeF3VQMpAJwh1:CID1   CID1  | tee jobID.txt
+
+
 
 ## Commands to retreive results from Bacalhau:
-
 rm -rf wasm_results && mkdir -p wasm_results
 bacalhau get $(grep "Job ID:" jobID.txt | cut -f2 -d:) --output-dir wasm_results
-
-
-bacalhau wasm run ./target/wasm32-wasi/release/bacalhau_compute.wasm -v QmSCMeGh17KJWA9VHPftWqA1xdWM7McVtt3azxH3aenp1X:json 1000 json
-
-
-expected root:
-0xfbc58ae8fe0f83d86d71a4bd95a65de75fb907ecae498c6f4bb7a5e26d2cc53a
-
-expected tree:
-{"format":"standard-v1","tree":["0xfbc58ae8fe0f83d86d71a4bd95a65de75fb907ecae498c6f4bb7a5e26d2cc53a","0x2c8e9760a3148e196dce3ee09866d46eb2e912cbc1fbd0a260341903916bb846","0xcca558d886a08ce49db72067b7a899ce976d483acd12ba40658142086302782e","0x922454c370802a6c3f9c22197aac8b3de9bd4f743ddc581d55b91b29a299872d","0x6f6eecd35cedbfbdffbc4de52ded8ca576dab4ead43930451dbb70f0f3531d0f"],"values":[{"value":["0x8584e54df79d9ea3216195ce034977968f01457c","100"],"tree_index":2},{"value":["0x624ec4a3ffa86bcef4d06706034d1fddbc9f56b4","100"],"tree_index":4},{"value":["0x7ff8b020c2ecd40613063ae1d2ee6a2a383793fa","100"],"tree_index":3}],"leaf_encoding":["address","uint256"]}
