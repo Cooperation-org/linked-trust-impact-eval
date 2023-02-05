@@ -86,7 +86,7 @@ export default function Layout({ children }) {
         <section style={{ width: "1024px" }}>
           <div
             className={styles.paragraf}
-            style={{ margin: "5px 0px 0px 50px" }}
+            style={{ margin: "5px 0px 0px 165px" }}
           >
             {isConnected && (
               <Disconnect onDisconnect={disconnect} connection={connection} />

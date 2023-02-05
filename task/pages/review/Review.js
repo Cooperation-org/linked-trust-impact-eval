@@ -67,23 +67,22 @@ export default function Review() {
     task: "",
     id: 0,
     effectiveDate: "",
+    source: "",
   });
-  //const [approvedAmount, setApprovedAmt] = useState(0);
   const [approved, setApproved] = useState(false);
-  //const [submitted, setSubmitted] = useState(false);
-  //const [statusMessage, setTaskStatus] = useState("Needs Approval");
-  const [distributedAmount, setDistributedAmt] = useState(0.0);
+  const [totalDistributedAmt, setTotalDistributedAmt] = useState(0.0);
+  const [totalApprovedAmt, setTotalApprovedAmt] = useState(0.0);
   const [inputFields, setInputFields] = useState([
     {
       member: "",
       amount: 0,
       streamId: "",
       submitted: false,
-      wallet: "<wallet>",
+      subject: "<wallet>",
     },
   ]);
   const [connection] = useViewerConnection();
-  const [message, setMessage] = useState("");
+
   const [projectName, setProjectName] = useState("");
 
   useEffect(() => {
@@ -111,16 +110,23 @@ export default function Review() {
       console.log(`summedAmount:  ${summedAmt}`);
     }
 
-    setInputFields(data);
     // Update the distributed amount
     let newTasks;
     let i = tasks.findIndex((task) => task.id === activeTask.id);
-    if (i <= 0) {
+    if (i >= 0) {
       newTasks = tasks;
       newTasks[i].distributedAmount = summedAmt;
       setTasks(newTasks);
-      //setDistributedAmt(summedAmt);
+    } else {
+      console.log(
+        `Did not finding matching task for activeTask.id:  ${activeTask.id}.  Index = ${i}`
+      );
+      for (let i = 0; i < tasks.length; i++) {
+        console.log(`Task id:  ${tasks[i].id}`);
+      }
     }
+    // Update State Fields
+    setInputFields(data);
   };
 
   const addFields = () => {
@@ -150,6 +156,7 @@ export default function Review() {
       if (tasks[index].taskStatus === "Submitted") {
         return alert(`This task has already been submitted`);
       } else {
+        let newTotalDistributeAmt = totalDistributedAmt;
         for (let i = 0; i < inputFields.length; i++) {
           console.log(`submit: member:  ${inputFields[i].member}`);
           if (inputFields[i].member === "" || inputFields[i].amount <= 0) {
@@ -159,146 +166,135 @@ export default function Review() {
           // Create an "Earned" Claim for each member
           const earned_variables = {
             claim: activeTask.task,
-            subject: inputFields[i].wallet,
+            subject: "<wallet address>",
             amount: parseInt(inputFields[i].amount),
+            amountUnits: "ETH",
+            source: activeTask.source,
             effective_date: activeTask.effectiveDate,
             rootClaimID,
           };
           const earnedResponse = await createClaim(compose, earned_variables);
           if (earnedResponse.message == "SUCCESS") {
-            console.log("submit: Review Earned - Success!");
-
-            console.log(
-              `submit: Index:  ${index}, activeTaskId:  ${activeTask.id}`
-            );
-
             newTasks[
               index
-            ].message += `\r\n Earned Stream ID for ${inputFields[i].member}: ${earnedResponse.streamID}`;
+            ].message += `\r\nEarned Stream ID for ${inputFields[i].member}: ${earnedResponse.streamID}`;
             newTasks[index].taskStatus = "Submitted";
-
-            //setTasks(newTasks);
+            newTotalDistributeAmt += Number(inputFields[i].amount);
           } else {
             // There was an error creating the Earned claim
+            console.log(
+              `submit:ERROR creating earned claim:  ${earnedResponse.message} `
+            );
             newTasks[
               index
             ].message = `Approved Stream:  ${rootClaimID}. Failed to create Earned Claim for  with error:  ${earnedResponse.message}`;
             newTasks[index].taskStatus = "Failed";
-            //setTasks(newTasks);
           }
         }
+        setTotalDistributedAmt(newTotalDistributeAmt);
+        setApproved(false);
       }
-      console.log(`Submit Task Status:  ${newTasks[index].taskStatus}`);
       setTasks(newTasks);
-      let newInputFields = inputFields;
+      let newInputFields = [
+        {
+          member: "",
+          amount: 0,
+          streamId: "",
+          submitted: false,
+          subject: "<wallet>",
+        },
+      ];
       setInputFields(newInputFields);
     }
   };
 
   if (tasks.length > 0) {
-    console.log(`Approved value:  ${approved}`);
-    for (let i = 0; i < tasks.length; i++) {
-      console.log(
-        `Task ${tasks[i].task} and task Status ${tasks[i].taskStatus}`
-      );
-    }
     tasksComponent = tasks.map((taskInDB) => {
       const {
         id,
         task,
         claimedBy,
         project,
+        source,
         amount,
         effectiveDate,
         taskStatus,
         approvedAmount,
         distributedAmount,
         message,
+        subject,
       } = taskInDB;
-      //const acc = claimedBy.slice(0, 4) + "..." + claimedBy.slice(34);
 
       if (projectName == "") {
         setProjectName(project);
       }
       distributeComponents = <p></p>;
-      var subject = "<wallet address>";
 
-      // Show the AmountsComponents
-      if (id === activeTask.id) {
-        console.log(`activeTaskId:  ${activeTask.id} and id is ${id}`);
-        amountsComponents = (
+      // Build the AmountsComponents
+      amountsComponents = (
+        <div>
           <div>
-            <div>
-              <span
-                style={{
-                  fontWeight: "bold",
-                  padding: "0px 2px 2px 500px",
-                }}
-              >
-                Approved Amount:
-              </span>
-              <span
-                style={{
-                  fontWeight: 600,
-                  padding: "0px 2px 200px 0px",
-                }}
-              >
-                {approvedAmount.toFixed(2)}
-              </span>
-            </div>
-            <div>
-              <span
-                style={{
-                  fontWeight: "bold",
-                  padding: "0px 2px 2px 500px",
-                }}
-              >
-                Distributed Amount:
-              </span>
-              <span
-                style={{
-                  fontWeight: 600,
-                  padding: "0px 2px 200px 0px",
-                }}
-              >
-                {" "}
-                {distributedAmount.toFixed(2)}
-              </span>
-            </div>
-
-            <div>
-              <span
-                style={{
-                  fontWeight: "bold",
-                  padding: "0px 2px 2px 500px",
-                }}
-              >
-                Available Amount:
-              </span>
-              <span
-                style={{
-                  fontWeight: 600,
-                  padding: "0px 2px 200px 0px",
-                }}
-              >
-                {" "}
-                {(amount - distributedAmount).toFixed(2)}
-              </span>
-            </div>
+            <span
+              style={{
+                fontWeight: "bold",
+                padding: "0px 2px 2px 500px",
+              }}
+            >
+              Approved Amount:
+            </span>
+            <span
+              style={{
+                fontWeight: 600,
+                padding: "0px 2px 200px 0px",
+              }}
+            >
+              {approvedAmount.toFixed(2)}
+            </span>
           </div>
-        );
-      } else {
-        console.log(`activeTaskId:  ${activeTask.id} and id is ${id}`);
-        // don't show the amountsComponents
-        amountsComponents = <div></div>;
-      }
+          <div>
+            <span
+              style={{
+                fontWeight: "bold",
+                padding: "0px 2px 2px 500px",
+              }}
+            >
+              Distributed Amount:
+            </span>
+            <span
+              style={{
+                fontWeight: 600,
+                padding: "0px 2px 200px 0px",
+              }}
+            >
+              {" "}
+              {distributedAmount.toFixed(2)}
+            </span>
+          </div>
+
+          <div>
+            <span
+              style={{
+                fontWeight: "bold",
+                padding: "0px 2px 2px 500px",
+              }}
+            >
+              Available Amount:
+            </span>
+            <span
+              style={{
+                fontWeight: 600,
+                padding: "0px 2px 200px 0px",
+              }}
+            >
+              {" "}
+              {(amount - distributedAmount).toFixed(2)}
+            </span>
+          </div>
+        </div>
+      );
 
       // Show the DistributeTo components
       if (id === showDistributeTo) {
-        console.log(`id:  ${id} and showDistributeTo:  ${showDistributeTo}`);
-        console.log(
-          `Line297 tasks.map cb Status for task ${task}:  ${taskStatus}`
-        );
         // build the option element for each user
         let optionsArray = [];
         optionsArray[0] = (
@@ -306,16 +302,18 @@ export default function Review() {
             {`<Select User>`}
           </option>
         );
+        let memberDistributionRow = <div></div>;
 
-        for (let i = 0; i < users.length; i++) {
-          optionsArray[i + 1] = (
-            <option key={i + 1} value={users[i].fullNameDisplay}>
-              {users[i].fullNameDisplay}
-            </option>
-          );
-        }
-        if (inputFields.length !== 0) {
-          let memberDistributionRow = (
+        // Build the Member Distribution Row if the task has a submitted status
+        if (taskStatus !== "Submitted") {
+          for (let i = 0; i < users.length; i++) {
+            optionsArray[i + 1] = (
+              <option key={i + 1} value={users[i].fullNameDisplay}>
+                {users[i].fullNameDisplay}
+              </option>
+            );
+          }
+          memberDistributionRow = (
             <div>
               <form onSubmit={submit}>
                 {inputFields.map((input, index) => {
@@ -380,6 +378,7 @@ export default function Review() {
               </div>
             </div>
           );
+          //}
 
           // build distribute components
           distributeComponents = (
@@ -435,121 +434,101 @@ export default function Review() {
           );
         }
       } else {
-        // Add button row
-        buttonRow = (
-          <div
-            style={{
-              paddingTop: "20px",
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <span style={{ padding: "25px 2px 25px 0px" }}>
-              <button
-                //style={{ backgroundColor: approved ? "#3498db;" : "#5d6062" }}
-                //className={!approved ? "styles.btn" : "style.btn"}
-                className={styles.btn}
-                onClick={async () => {
-                  if (approved) {
-                    let index = tasks.findIndex(
-                      (task) => task.id === activeTask.id
-                    );
-                    console.log(
-                      `Index:  ${index}, activeTaskId:  ${activeTask.id}`
-                    );
-                    if (index >= 0) {
-                      tasks[index].message = "Task has already been approved";
-                    }
-                    setTasks(tasks);
-                  } else {
-                    const confirmBox = window.confirm(
-                      `Confirm approval of full amount ${amount}`
-                    );
-                    if (confirmBox === true) {
-                      const compose = await getCompose(connection.selfID.did);
-
-                      // Create the "Approved" Claim
-                      const approvedVariables = {
-                        claim: task,
-                        subject: subject,
-                        amount: Number(credit),
-                        effective_date: effectiveDate,
-                        root_claim_id,
-                      };
-
-                      const approvedResponse = await createClaim(
-                        compose,
-                        approvedVariables
+        if (taskStatus !== "Submitted") {
+          // Add button row
+          buttonRow = (
+            <div
+              style={{
+                paddingTop: "20px",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <span style={{ padding: "25px 2px 25px 0px" }}>
+                <button
+                  className={styles.btn}
+                  onClick={async () => {
+                    if (approved) {
+                      let index = tasks.findIndex(
+                        (task) => task.id === activeTask.id
                       );
-                      if (approvedResponse.message == "SUCCESS") {
-                        console.log("Approved Review - Success!");
-                        root_claim_id = approvedResponse.streamID;
-                        setRootClaimID(approvedResponse.streamID);
-                        setActiveTask({
-                          task: task,
-                          id: id,
-                          effectiveDate: effectiveDate,
-                        });
 
-                        console.log(`Active Task ID:  ${id}`);
-                        let index = tasks.findIndex((item) => item.id === id);
-                        console.log(`Index value:  ${index}`);
-                        if (index >= 0) {
-                          console.log("setting task status to Approved");
-                          tasks[index].taskStatus =
-                            "Approved and Ready to Distribute";
-                          tasks[index].approvedAmount = Number(amount);
-                          tasks[
-                            index
-                          ].message = `Approved Stream ID:  ${approvedResponse.streamID}`;
-                        }
-                        setTasks(tasks);
-                        //setTaskStatus("Approved and Ready to Distribute");
-                        setApproved(true);
-                        //setApprovedAmt(Number(amount));
-                        console.log("ComposeDB Approved executeQuery complete");
-                      } else {
-                        console.log(
-                          `onClick bad response: ${approvedResponse.errors}`
+                      if (index >= 0) {
+                        tasks[index].message = "Task has already been approved";
+                      }
+                      setTasks(tasks);
+                    } else {
+                      const confirmBox = window.confirm(
+                        `Confirm approval of full amount ${amount}`
+                      );
+                      if (confirmBox === true) {
+                        const compose = await getCompose(connection.selfID.did);
+
+                        // Create the "Approved" Claim
+                        const approvedVariables = {
+                          claim: task,
+                          subject: subject,
+                          amount: Number(credit),
+                          amountUnits: "ETH",
+                          source: source,
+                          effective_date: effectiveDate,
+                          root_claim_id,
+                        };
+
+                        const approvedResponse = await createClaim(
+                          compose,
+                          approvedVariables
                         );
+                        if (approvedResponse.message == "SUCCESS") {
+                          console.log("Approved Review - Success!");
+                          root_claim_id = approvedResponse.streamID;
+                          setRootClaimID(approvedResponse.streamID);
+                          setActiveTask({
+                            task: task,
+                            id: id,
+                            effectiveDate: effectiveDate,
+                            source: source,
+                          });
 
-                        let index = tasks.findIndex((item) => item.id === id);
-                        console.log(`Index value:  ${index}`);
-                        if (index >= 0) {
-                          tasks[index].message = `approvedResponse.message`;
+                          console.log(`Active Task ID:  ${id}`);
+                          let index = tasks.findIndex((item) => item.id === id);
+                          console.log(`Index value:  ${index}`);
+                          if (index >= 0) {
+                            console.log("setting task status to Approved");
+                            tasks[index].taskStatus =
+                              "Approved and Ready to Distribute";
+                            tasks[index].approvedAmount = Number(amount);
+                            tasks[
+                              index
+                            ].message = `Approved Stream ID:  ${approvedResponse.streamID}`;
+                          }
+                          setTasks(tasks);
+                          setApproved(true);
+                          setShowDistributeTo(id);
+                        } else {
+                          // There was an error created the Approved Claim
+                          console.log(
+                            `onClick bad response: ${approvedResponse.errors}`
+                          );
+                          let index = tasks.findIndex((item) => item.id === id);
+                          if (index >= 0) {
+                            tasks[index].message = `approvedResponse.message`;
+                          }
+                          setTasks(tasks);
+                          setApproved(false);
                         }
-                        setTasks(tasks);
-
-                        //setMessage(approvedResponse.message);
-                        setApproved(false);
                       }
                     }
-                  }
-                }}
-              >
-                Approve
-              </button>
-            </span>
-            <span style={{ padding: "25px 2px 25px 0px" }}>
-              <button
-                className={styles.btn}
-                onClick={async () => {
-                  if (!approved) {
-                    setMessage("Task Amount must first be approved");
-                  } else {
-                    setShowDistributeTo(id);
-                  }
-                }}
-              >
-                Distribute
-              </button>
-            </span>
-          </div>
-        );
+                  }}
+                >
+                  Approve
+                </button>
+              </span>
+            </div>
+          );
+        }
       }
-      console.log(
-        `Line545 tasks.map cb Status for task ${task}:  ${taskStatus}`
-      );
+
       return (
         <div
           key={id}
@@ -574,7 +553,7 @@ export default function Review() {
               style={{
                 fontSize: "large",
                 fontWeight: "bold",
-                padding: "0px 2px 2px 0px",
+                padding: "0px 2px 2px 20px",
               }}
             >
               {"Task:  "}
@@ -587,14 +566,15 @@ export default function Review() {
               }}
             >
               {" "}
-              {task}
+              {task} {" - "}
+              {id}
             </span>
 
             <span
               style={{
                 fontSize: "large",
                 fontWeight: "bold",
-                padding: "0px 2px 2px 400px",
+                padding: "0px 2px 2px 300px",
               }}
             >
               Task Amount:
@@ -632,29 +612,24 @@ export default function Review() {
             </span>
           </div>
 
-          <div>
+          <div style={{ padding: "0px 2px 3px 20px" }}>
             <span style={{ fontSize: "small", fontWeight: "bold" }}>
               {"Project:   "}
             </span>
             <span style={{ fontSize: "small" }}>{projectName}</span>
           </div>
 
-          <div style={{ padding: "0px 2px 3px 0px" }}>
+          <div style={{ padding: "0px 2px 3px 20px" }}>
             <span style={{ fontWeight: "bold" }}>Claimant:</span>
             <span style={{ fontWeight: 600 }}> {claimedBy}</span>
           </div>
 
-          <div style={{ padding: "0px 2px 3px 0px" }}>
-            <span style={{ fontWeight: "bold" }}>Wallet:</span>
-            <span style={{ fontWeight: 600 }}> {`<wallet address>`}</span>
-          </div>
-
-          <div style={{ padding: "5px 2px 5px 0px" }}>
+          <div style={{ padding: "0px 2px 5px 20px" }}>
             <span style={{ fontWeight: "bold" }}>Effective Date:</span>
             <span style={{ fontWeight: 600 }}> {effectiveDate}</span>
           </div>
 
-          <div style={{ padding: "25px 2px 5px 0px" }}>{buttonRow}</div>
+          <div style={{ padding: "25px 2px 5px 20px" }}>{buttonRow}</div>
           <div
             style={{
               padding: "25px 2px 25px 20px",
@@ -686,6 +661,15 @@ export default function Review() {
       <main>
         {connection.status === "connected" && (
           <div>
+            <div
+              style={{
+                fontWeight: "bold",
+                padding: "0px 2px 2px 350px",
+              }}
+            >
+              <span>Total Distributed Amount: </span>
+              <span>{totalDistributedAmt}</span>
+            </div>
             <div>{tasksComponent}</div>
             <div
               style={{

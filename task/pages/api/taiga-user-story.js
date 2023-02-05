@@ -19,8 +19,10 @@ export default async function handler(req, res) {
 
 // Call the Taiga API to retrieve closed user stories for the project
 async function getTaigaUserStory() {
+  let url = `https://taiga.whatscookin.us/api/v1/userstories`;
+  //let url = `https://taiga.whatscookin.us/api/v1/userstories?project=${PROJECT_ID}`;
   const response = await fetch(
-    `https://taiga.whatscookin.us/api/v1/userstories?project=${PROJECT_ID}&status__is_closed=true`,
+    `${url}?project=${PROJECT_ID}&status__is_closed=true`,
 
     {
       method: "GET",
@@ -35,7 +37,7 @@ async function getTaigaUserStory() {
     throw new Error(response.statusText);
   }
   const taigaUserStoryList = await response.json();
-  const userStoryList = getTaskModel(taigaUserStoryList);
+  const userStoryList = getTaskModel(taigaUserStoryList, url);
   return userStoryList;
 }
 
@@ -67,7 +69,7 @@ async function getTaigaProject() {
   return projectDetail;
 }
 
-function getTaskModel(taigaUserStoryList) {
+function getTaskModel(taigaUserStoryList, url) {
   var userStoryList = {
     tasks: [],
   };
@@ -78,6 +80,7 @@ function getTaskModel(taigaUserStoryList) {
     const claimAmount = (pointsFactor * summedPoints).toFixed(2);
 
     console.log(`Task ID:  ${taigaUserStoryList[i].id}`);
+    let source = `${url}/${taigaUserStoryList[i].id}`;
 
     userStoryList.tasks[i] = {
       id: taigaUserStoryList[i].id,
@@ -86,12 +89,15 @@ function getTaskModel(taigaUserStoryList) {
       effectiveDate: String(taigaUserStoryList[i].finish_date).substring(0, 10),
       claimedBy: taigaUserStoryList[i].assigned_to_extra_info.username,
       project: taigaUserStoryList[i].project_extra_info.name,
+      source: source,
       amount: claimAmount,
       taskStatus: "Needs Approval",
       approvedAmount: 0,
       distributedAmount: 0,
       message: "",
+      subject: "<wallet address>",
     };
+    console.log(`Taiga User Story source url:  ${source}`);
   }
 
   return userStoryList;
