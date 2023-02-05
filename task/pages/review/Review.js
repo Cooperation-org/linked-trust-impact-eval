@@ -230,63 +230,136 @@ export default function Review() {
       }
       distributeComponents = <p></p>;
 
+      // Build the StatusComponent
+      let statusComponents = (
+        <div>
+          <span
+            style={{
+              fontWeight: "bold",
+              padding: "0px 0px 0px 120px",
+            }}
+          >
+            Status:
+          </span>
+          <span
+            style={{
+              padding: "0px 0px 0px 8px",
+            }}
+          >
+            {"  "}
+          </span>
+          <span
+            style={{
+              color: "red",
+              fontWeight: 600,
+              padding: "0px 0px 0px 0px",
+            }}
+          >
+            {taskStatus}
+          </span>
+        </div>
+      );
+
+      // Build the Project Summary Components
+      let projectSummaryComponents = (
+        <div>
+          <div style={{ padding: "0px 0px 0px 70px" }}>
+            <span style={{ fontWeight: "bold" }}>{"Project:   "}</span>
+            <span
+              style={{
+                padding: "0px 0px 0px 8px",
+              }}
+            >
+              {"  "}
+            </span>
+            <span>{projectName}</span>
+          </div>
+
+          <div style={{ padding: "0px 0px 0px 60px" }}>
+            <span style={{ fontWeight: "bold" }}>Claimant:</span>
+            <span
+              style={{
+                padding: "0px 0px 0px 8px",
+              }}
+            >
+              {"  "}
+            </span>
+            <span> {claimedBy}</span>
+          </div>
+
+          <div style={{ padding: "0px 0px 0px 20px" }}>
+            <span style={{ fontWeight: "bold" }}>Effective Date:</span>
+            <span
+              style={{
+                padding: "0px 0px 0px 8px",
+              }}
+            >
+              {"  "}
+            </span>
+            <span> {effectiveDate}</span>
+          </div>
+        </div>
+      );
+
       // Build the AmountsComponents
       amountsComponents = (
         <div>
           <div>
-            <span
-              style={{
-                fontWeight: "bold",
-                padding: "0px 2px 2px 500px",
-              }}
-            >
+            <span style={{ fontWeight: "bold", padding: "0px 5px 0px 32px" }}>
               Approved Amount:
             </span>
             <span
               style={{
-                fontWeight: 600,
-                padding: "0px 2px 200px 0px",
+                padding: "0px 0px 0px 8px",
+              }}
+            >
+              {"  "}
+            </span>
+            <span
+              style={{
+                padding: "0px 5px 0px 2px",
+                textAlign: "right",
               }}
             >
               {approvedAmount.toFixed(2)}
             </span>
           </div>
           <div>
-            <span
-              style={{
-                fontWeight: "bold",
-                padding: "0px 2px 2px 500px",
-              }}
-            >
+            <span style={{ fontWeight: "bold", padding: "0px 0px 0px 23px" }}>
               Distributed Amount:
             </span>
             <span
               style={{
-                fontWeight: 600,
-                padding: "0px 2px 200px 0px",
+                padding: "0px 0px 0px 8px",
               }}
             >
-              {" "}
+              {"  "}
+            </span>
+            <span
+              style={{
+                padding: "0px 100px 0px 4px",
+              }}
+            >
               {distributedAmount.toFixed(2)}
             </span>
           </div>
 
           <div>
-            <span
-              style={{
-                fontWeight: "bold",
-                padding: "0px 2px 2px 500px",
-              }}
-            >
+            <span style={{ fontWeight: "bold", padding: "0px 0px 0px 36px" }}>
               Available Amount:
             </span>
             <span
               style={{
-                fontWeight: 600,
-                padding: "0px 2px 200px 0px",
+                padding: "0px 0px 0px 8px",
               }}
             >
-              {" "}
+              {"  "}
+            </span>
+            <span
+              style={{
+                padding: "0px 0px 0px 4px",
+              }}
+            >
               {(amount - distributedAmount).toFixed(2)}
             </span>
           </div>
@@ -590,43 +663,12 @@ export default function Review() {
               {amount}
             </span>
           </div>
-          {amountsComponents}
-          <div>
-            <span
-              style={{
-                fontWeight: "bold",
-                padding: "0px 2px 2px 500px",
-              }}
-            >
-              Status:
-            </span>
-            <span
-              style={{
-                color: "red",
-                fontWeight: 600,
-                padding: "0px 2px 200px 0px",
-              }}
-            >
-              {" "}
-              {taskStatus}
-            </span>
-          </div>
-
-          <div style={{ padding: "0px 2px 3px 20px" }}>
-            <span style={{ fontSize: "small", fontWeight: "bold" }}>
-              {"Project:   "}
-            </span>
-            <span style={{ fontSize: "small" }}>{projectName}</span>
-          </div>
-
-          <div style={{ padding: "0px 2px 3px 20px" }}>
-            <span style={{ fontWeight: "bold" }}>Claimant:</span>
-            <span style={{ fontWeight: 600 }}> {claimedBy}</span>
-          </div>
-
-          <div style={{ padding: "0px 2px 5px 20px" }}>
-            <span style={{ fontWeight: "bold" }}>Effective Date:</span>
-            <span style={{ fontWeight: 600 }}> {effectiveDate}</span>
+          <div className={styles.gridcontainer}>
+            <div className={styles.griditem}>{projectSummaryComponents}</div>
+            <div className={styles.griditem}>
+              {amountsComponents}
+              {statusComponents}
+            </div>
           </div>
 
           <div style={{ padding: "25px 2px 5px 20px" }}>{buttonRow}</div>
