@@ -2,9 +2,10 @@ import Link from "next/link";
 
 const path = [
   { uid: 21, name: " Home", id: 1, path: "/" },
-  { uid: 31, name: "Review", id: 2, path: "/review/Review" },
-  { uid: 41, name: "CID", id: 3, path: "/cid/Cid" },
-  { uid: 51, name: "About", id: 3, path: "/about/About" },
+  { uid: 31, name: "Approve", id: 2, path: "/approve/Approve" },
+  { uid: 41, name: "Distribute", id: 3, path: "/distribute/Distribute" },
+  { uid: 51, name: "Payment", id: 4, path: "/cid/Cid" },
+  { uid: 61, name: "Inquire", id: 5, path: "/cid/Cid" },
 ];
 export default function Header() {
   return (

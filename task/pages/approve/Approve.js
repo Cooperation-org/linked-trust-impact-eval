@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import styles from "../../styles/Review.module.css";
+import styles from "../../styles/Approve.module.css";
 import { Inter } from "@next/font/google";
 import Head from "next/head";
 import { useViewerConnection } from "@self.id/framework";
@@ -58,7 +58,7 @@ async function createClaim(compose, variables) {
   return response;
 }
 
-export default function Review() {
+export default function Approve() {
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
   const [showDistributeTo, setShowDistributeTo] = useState(0.0);
@@ -141,17 +141,20 @@ export default function Review() {
   const submit = async (e) => {
     e.preventDefault();
 
-    console.log(inputFields);
-    console.log(
-      `submit: Creating earned claim for ${inputFields.length} members`
-    );
     // Identify the task we are actively working on
     let index = tasks.findIndex((task) => task.id === activeTask.id);
     let newTasks = tasks;
     if (index >= 0) {
+      // We don't want to create earned claims for more than the approved amount
       console.log(
-        `submitted:  Found Task for index ${index} and TaskID:  ${newTasks[index].id}`
+        `Approved Amount:  ${tasks[index].approvedAmount}.  Distributed Amount: ${tasks[index].distributedAmount} `
       );
+      if (
+        Number(tasks[index].distributedAmount) >
+        Number(tasks[index].approvedAmount)
+      ) {
+        return alert("The distributed amount exceeds the approved amount");
+      }
       // We don't want to process the same task twice...so confirm
       if (tasks[index].taskStatus === "Submitted") {
         return alert(`This task has already been submitted`);
@@ -438,7 +441,7 @@ export default function Review() {
                 })}
               </form>
               <div style={{ padding: "25px 2px 25px 250px" }}>
-                <span style={{ padding: "0px 2px 3px 0px" }}>
+                <span style={{ padding: "0px 10px 3px 0px" }}>
                   <button className={styles.btn} onClick={addFields}>
                     Add
                   </button>
@@ -467,7 +470,7 @@ export default function Review() {
                   style={{
                     fontSize: "medium",
                     fontWeight: "bold",
-                    padding: "0px 2px 20px 0px",
+                    padding: "0px 5px 40px 10px",
                   }}
                 >
                   Remaining funds to be distributed:
@@ -496,10 +499,10 @@ export default function Review() {
                   style={{
                     fontSize: "large",
                     fontWeight: "bold",
-                    padding: "0px 2px 2px 200px",
+                    padding: "0px 2px 2px 175px",
                   }}
                 >
-                  Amount
+                  Amount (USD)
                 </span>
               </div>
               {memberDistributionRow}
@@ -517,7 +520,7 @@ export default function Review() {
                 justifyContent: "center",
               }}
             >
-              <span style={{ padding: "25px 2px 25px 0px" }}>
+              <span style={{ padding: "0px 2px 25px 0px" }}>
                 <button
                   className={styles.btn}
                   onClick={async () => {
@@ -609,8 +612,9 @@ export default function Review() {
             padding: "5px",
             background: "white",
             borderRadius: "5px",
+            border: "1px solid rgba(0, 0, 0, 5)",
             fontSize: "small",
-            margin: "15px 10px 100px 100px",
+            margin: "15px 0px 0px 100px",
             boxShadow: "1px 1px 2px rgba(0, 0, 0, .25)",
             width: "800px",
           }}
@@ -671,10 +675,10 @@ export default function Review() {
             </div>
           </div>
 
-          <div style={{ padding: "25px 2px 5px 20px" }}>{buttonRow}</div>
+          <div style={{ padding: "0px 2px 5px 20px" }}>{buttonRow}</div>
           <div
             style={{
-              padding: "25px 2px 25px 20px",
+              padding: "0px 2px 20px 20px",
               color: "red",
               whiteSpace: "pre",
             }}
@@ -697,7 +701,7 @@ export default function Review() {
         <meta charSet="utf-8" />
       </Head>
       <div className={styles.grid}>
-        <h1 className={styles.title}> Review page </h1>
+        <h1 className={styles.title}> Approve Tasks </h1>
       </div>
 
       <main>

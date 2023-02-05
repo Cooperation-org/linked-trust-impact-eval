@@ -3,7 +3,7 @@ import Header from "./Header";
 
 import { useState, useEffect } from "react";
 import { useViewerConnection, EthereumAuthProvider } from "@self.id/framework";
-import styles from "../styles/Review.module.css";
+import styles from "../styles/Approve.module.css";
 
 const Disconnect = ({ onDisconnect, connection }) => {
   return (
