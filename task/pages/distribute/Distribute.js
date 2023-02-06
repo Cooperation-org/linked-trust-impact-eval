@@ -38,13 +38,6 @@ export const CREATE_CLAIM = `
   }
 `;
 
-const task = "";
-const by = "";
-const credit = 0;
-const round = "";
-const memberVal = "";
-var root_claim_id = " ";
-
 async function createClaim(compose, variables) {
   const response = { message: "", streamID: "" };
   const composeDBResult = await compose.executeQuery(CREATE_CLAIM, variables);
@@ -53,7 +46,7 @@ async function createClaim(compose, variables) {
     response.message = "SUCCESS";
   } else {
     response.message = `Error creating persisting ${composeDBResult.errors}`;
-    console.log(`review.js:createClaim - ERROR ${composeDBResult.errors}`);
+    console.error(`review.js:createClaim - ERROR ${composeDBResult.errors}`);
   }
   return response;
 }
@@ -81,12 +74,13 @@ export default function Distribute() {
       subject: "<wallet>",
     },
   ]);
+
   const [connection] = useViewerConnection();
 
   const [projectName, setProjectName] = useState("");
 
   useEffect(() => {
-    fetch("/api/taiga-user-story")
+    fetch("/api/taiga-user-story?status=closed")
       .then((res) => res.json())
       .then((b) => {
         setTasks(b.userStoryList.tasks);
@@ -99,7 +93,6 @@ export default function Distribute() {
   let amountsComponents;
 
   let buttonRow;
-  let commitButton;
 
   const handleFormChange = (index, event) => {
     let data = [...inputFields];
@@ -107,7 +100,6 @@ export default function Distribute() {
     let summedAmt = 0;
     for (let i = 0; i < data.length; i++) {
       summedAmt += Number(data[i].amount);
-      console.log(`summedAmount:  ${summedAmt}`);
     }
 
     // Update the distributed amount
@@ -117,13 +109,6 @@ export default function Distribute() {
       newTasks = tasks;
       newTasks[i].distributedAmount = summedAmt;
       setTasks(newTasks);
-    } else {
-      console.log(
-        `Did not finding matching task for activeTask.id:  ${activeTask.id}.  Index = ${i}`
-      );
-      for (let i = 0; i < tasks.length; i++) {
-        console.log(`Task id:  ${tasks[i].id}`);
-      }
     }
     // Update State Fields
     setInputFields(data);
@@ -146,9 +131,6 @@ export default function Distribute() {
     let newTasks = tasks;
     if (index >= 0) {
       // We don't want to create earned claims for more than the approved amount
-      console.log(
-        `Approved Amount:  ${tasks[index].approvedAmount}.  Distributed Amount: ${tasks[index].distributedAmount} `
-      );
       if (
         Number(tasks[index].distributedAmount) >
         Number(tasks[index].approvedAmount)
@@ -161,17 +143,27 @@ export default function Distribute() {
       } else {
         let newTotalDistributeAmt = totalDistributedAmt;
         for (let i = 0; i < inputFields.length; i++) {
-          console.log(`submit: member:  ${inputFields[i].member}`);
           if (inputFields[i].member === "" || inputFields[i].amount <= 0) {
             return alert(`Please select a user and provide a non-zero amount`);
           }
           const compose = await getCompose(connection.selfID.did);
           // Create an "Earned" Claim for each member
+          let wallet = "<wallet>";
+          let index = users.findIndex(
+            (user) => user.fullNameDisplay === inputFields[i].member
+          );
+          if (index >= 0) {
+            wallet = users[index].walletAddress;
+          } else {
+            console.error(
+              "Distribute.js:submit - Did not find wallet for user"
+            );
+          }
           const earned_variables = {
             claim: activeTask.task,
-            subject: "<wallet address>",
+            subject: wallet,
             amount: parseInt(inputFields[i].amount),
-            amountUnits: "ETH",
+            amountUnits: "USDC",
             source: activeTask.source,
             effective_date: activeTask.effectiveDate,
             rootClaimID,
@@ -185,7 +177,7 @@ export default function Distribute() {
             newTotalDistributeAmt += Number(inputFields[i].amount);
           } else {
             // There was an error creating the Earned claim
-            console.log(
+            console.error(
               `submit:ERROR creating earned claim:  ${earnedResponse.message} `
             );
             newTasks[
@@ -217,6 +209,7 @@ export default function Distribute() {
         id,
         task,
         claimedBy,
+        owner,
         project,
         source,
         amount,
@@ -279,7 +272,7 @@ export default function Distribute() {
           </div>
 
           <div style={{ padding: "0px 0px 0px 60px" }}>
-            <span style={{ fontWeight: "bold" }}>Claimant:</span>
+            <span style={{ fontWeight: "bold" }}>Owner:</span>
             <span
               style={{
                 padding: "0px 0px 0px 8px",
@@ -287,7 +280,7 @@ export default function Distribute() {
             >
               {"  "}
             </span>
-            <span> {claimedBy}</span>
+            <span> {owner}</span>
           </div>
 
           <div style={{ padding: "0px 0px 0px 20px" }}>
@@ -389,6 +382,7 @@ export default function Distribute() {
               </option>
             );
           }
+
           memberDistributionRow = (
             <div>
               <form onSubmit={submit}>
@@ -524,80 +518,22 @@ export default function Distribute() {
                 <button
                   className={styles.btn}
                   onClick={async () => {
-                    if (approved) {
-                      let index = tasks.findIndex(
-                        (task) => task.id === activeTask.id
-                      );
-
-                      if (index >= 0) {
-                        tasks[index].message = "Task has already been approved";
-                      }
-                      setTasks(tasks);
-                    } else {
-                      const confirmBox = window.confirm(
-                        `Confirm approval of full amount ${amount}`
-                      );
-                      if (confirmBox === true) {
-                        const compose = await getCompose(connection.selfID.did);
-
-                        // Create the "Approved" Claim
-                        const approvedVariables = {
-                          claim: task,
-                          subject: subject,
-                          amount: Number(credit),
-                          amountUnits: "ETH",
-                          source: source,
-                          effective_date: effectiveDate,
-                          root_claim_id,
-                        };
-
-                        const approvedResponse = await createClaim(
-                          compose,
-                          approvedVariables
-                        );
-                        if (approvedResponse.message == "SUCCESS") {
-                          console.log("Approved Review - Success!");
-                          root_claim_id = approvedResponse.streamID;
-                          setRootClaimID(approvedResponse.streamID);
-                          setActiveTask({
-                            task: task,
-                            id: id,
-                            effectiveDate: effectiveDate,
-                            source: source,
-                          });
-
-                          console.log(`Active Task ID:  ${id}`);
-                          let index = tasks.findIndex((item) => item.id === id);
-                          console.log(`Index value:  ${index}`);
-                          if (index >= 0) {
-                            console.log("setting task status to Approved");
-                            tasks[index].taskStatus =
-                              "Approved and Ready to Distribute";
-                            tasks[index].approvedAmount = Number(amount);
-                            tasks[
-                              index
-                            ].message = `Approved Stream ID:  ${approvedResponse.streamID}`;
-                          }
-                          setTasks(tasks);
-                          setApproved(true);
-                          setShowDistributeTo(id);
-                        } else {
-                          // There was an error created the Approved Claim
-                          console.log(
-                            `onClick bad response: ${approvedResponse.errors}`
-                          );
-                          let index = tasks.findIndex((item) => item.id === id);
-                          if (index >= 0) {
-                            tasks[index].message = `approvedResponse.message`;
-                          }
-                          setTasks(tasks);
-                          setApproved(false);
-                        }
-                      }
+                    setActiveTask({
+                      task: task,
+                      id: id,
+                      effectiveDate: effectiveDate,
+                      source: source,
+                    });
+                    let index = tasks.findIndex((item) => item.id === id);
+                    if (index >= 0) {
+                      tasks[index].approvedAmount = Number(amount);
                     }
+
+                    setApproved(true);
+                    setShowDistributeTo(id);
                   }}
                 >
-                  Approve
+                  Distribute
                 </button>
               </span>
             </div>

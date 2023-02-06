@@ -13,6 +13,7 @@ export const CREATE_CLAIM = `
     $subject: String!
     $root_claim_id: String
     $amount: Int
+    $source: String
     $effective_date: String!
   ){
     createIEClaim(
@@ -22,6 +23,7 @@ export const CREATE_CLAIM = `
           subject: $subject
           root_claim_id: $root_claim_id
           amount: $amount
+          source: $source
           effective_date: $effective_date
         }
       }
@@ -31,6 +33,7 @@ export const CREATE_CLAIM = `
         claim
         subject
         amount
+        source
         root_claim_id
         effective_date
       }
@@ -38,11 +41,7 @@ export const CREATE_CLAIM = `
   }
 `;
 
-const task = "";
-const by = "";
 const credit = 0;
-const round = "";
-const memberVal = "";
 var root_claim_id = " ";
 
 async function createClaim(compose, variables) {
@@ -53,7 +52,7 @@ async function createClaim(compose, variables) {
     response.message = "SUCCESS";
   } else {
     response.message = `Error creating persisting ${composeDBResult.errors}`;
-    console.log(`review.js:createClaim - ERROR ${composeDBResult.errors}`);
+    console.error(`review.js:createClaim - ERROR ${composeDBResult.errors}`);
   }
   return response;
 }
@@ -72,21 +71,13 @@ export default function Approve() {
   const [approved, setApproved] = useState(false);
   const [totalDistributedAmt, setTotalDistributedAmt] = useState(0.0);
   const [totalApprovedAmt, setTotalApprovedAmt] = useState(0.0);
-  const [inputFields, setInputFields] = useState([
-    {
-      member: "",
-      amount: 0,
-      streamId: "",
-      submitted: false,
-      subject: "<wallet>",
-    },
-  ]);
+
   const [connection] = useViewerConnection();
 
   const [projectName, setProjectName] = useState("");
 
   useEffect(() => {
-    fetch("/api/taiga-user-story")
+    fetch("/api/taiga-user-story?status=ready")
       .then((res) => res.json())
       .then((b) => {
         setTasks(b.userStoryList.tasks);
@@ -99,117 +90,6 @@ export default function Approve() {
   let amountsComponents;
 
   let buttonRow;
-  let commitButton;
-
-  const handleFormChange = (index, event) => {
-    let data = [...inputFields];
-    data[index][event.target.name] = event.target.value;
-    let summedAmt = 0;
-    for (let i = 0; i < data.length; i++) {
-      summedAmt += Number(data[i].amount);
-      console.log(`summedAmount:  ${summedAmt}`);
-    }
-
-    // Update the distributed amount
-    let newTasks;
-    let i = tasks.findIndex((task) => task.id === activeTask.id);
-    if (i >= 0) {
-      newTasks = tasks;
-      newTasks[i].distributedAmount = summedAmt;
-      setTasks(newTasks);
-    } else {
-      console.log(
-        `Did not finding matching task for activeTask.id:  ${activeTask.id}.  Index = ${i}`
-      );
-      for (let i = 0; i < tasks.length; i++) {
-        console.log(`Task id:  ${tasks[i].id}`);
-      }
-    }
-    // Update State Fields
-    setInputFields(data);
-  };
-
-  const addFields = () => {
-    let newfield = { member: "", amount: 0 };
-    setInputFields([...inputFields, newfield]);
-  };
-  const removeFields = (index) => {
-    let data = [...inputFields];
-    data.splice(index, 1);
-    setInputFields(data);
-  };
-  const submit = async (e) => {
-    e.preventDefault();
-
-    // Identify the task we are actively working on
-    let index = tasks.findIndex((task) => task.id === activeTask.id);
-    let newTasks = tasks;
-    if (index >= 0) {
-      // We don't want to create earned claims for more than the approved amount
-      console.log(
-        `Approved Amount:  ${tasks[index].approvedAmount}.  Distributed Amount: ${tasks[index].distributedAmount} `
-      );
-      if (
-        Number(tasks[index].distributedAmount) >
-        Number(tasks[index].approvedAmount)
-      ) {
-        return alert("The distributed amount exceeds the approved amount");
-      }
-      // We don't want to process the same task twice...so confirm
-      if (tasks[index].taskStatus === "Submitted") {
-        return alert(`This task has already been submitted`);
-      } else {
-        let newTotalDistributeAmt = totalDistributedAmt;
-        for (let i = 0; i < inputFields.length; i++) {
-          console.log(`submit: member:  ${inputFields[i].member}`);
-          if (inputFields[i].member === "" || inputFields[i].amount <= 0) {
-            return alert(`Please select a user and provide a non-zero amount`);
-          }
-          const compose = await getCompose(connection.selfID.did);
-          // Create an "Earned" Claim for each member
-          const earned_variables = {
-            claim: activeTask.task,
-            subject: "<wallet address>",
-            amount: parseInt(inputFields[i].amount),
-            amountUnits: "ETH",
-            source: activeTask.source,
-            effective_date: activeTask.effectiveDate,
-            rootClaimID,
-          };
-          const earnedResponse = await createClaim(compose, earned_variables);
-          if (earnedResponse.message == "SUCCESS") {
-            newTasks[
-              index
-            ].message += `\r\nEarned Stream ID for ${inputFields[i].member}: ${earnedResponse.streamID}`;
-            newTasks[index].taskStatus = "Submitted";
-            newTotalDistributeAmt += Number(inputFields[i].amount);
-          } else {
-            // There was an error creating the Earned claim
-            console.log(
-              `submit:ERROR creating earned claim:  ${earnedResponse.message} `
-            );
-            newTasks[
-              index
-            ].message = `Approved Stream:  ${rootClaimID}. Failed to create Earned Claim for  with error:  ${earnedResponse.message}`;
-            newTasks[index].taskStatus = "Failed";
-          }
-        }
-        setTotalDistributedAmt(newTotalDistributeAmt);
-        setApproved(false);
-      }
-      setTasks(newTasks);
-      let newInputFields = [
-        {
-          member: "",
-          amount: 0,
-          streamId: "",
-          submitted: false,
-          subject: "<wallet>",
-        },
-      ];
-      setInputFields(newInputFields);
-    }
-  };
 
   if (tasks.length > 0) {
     tasksComponent = tasks.map((taskInDB) => {
@@ -217,6 +97,7 @@ export default function Approve() {
         id,
         task,
         claimedBy,
+        owner,
         project,
         source,
         amount,
@@ -279,7 +160,7 @@ export default function Approve() {
           </div>
 
           <div style={{ padding: "0px 0px 0px 60px" }}>
-            <span style={{ fontWeight: "bold" }}>Claimant:</span>
+            <span style={{ fontWeight: "bold" }}>Owner:</span>
             <span
               style={{
                 padding: "0px 0px 0px 8px",
@@ -287,7 +168,7 @@ export default function Approve() {
             >
               {"  "}
             </span>
-            <span> {claimedBy}</span>
+            <span> {owner}</span>
           </div>
 
           <div style={{ padding: "0px 0px 0px 20px" }}>
@@ -309,7 +190,7 @@ export default function Approve() {
         <div>
           <div>
             <span style={{ fontWeight: "bold", padding: "0px 5px 0px 32px" }}>
-              Approved Amount:
+              Approved Amount (USDC):
             </span>
             <span
               style={{
@@ -327,29 +208,10 @@ export default function Approve() {
               {approvedAmount.toFixed(2)}
             </span>
           </div>
-          <div>
-            <span style={{ fontWeight: "bold", padding: "0px 0px 0px 23px" }}>
-              Distributed Amount:
-            </span>
-            <span
-              style={{
-                padding: "0px 0px 0px 8px",
-              }}
-            >
-              {"  "}
-            </span>
-            <span
-              style={{
-                padding: "0px 100px 0px 4px",
-              }}
-            >
-              {distributedAmount.toFixed(2)}
-            </span>
-          </div>
 
           <div>
             <span style={{ fontWeight: "bold", padding: "0px 0px 0px 36px" }}>
-              Available Amount:
+              Available Amount (USDC):
             </span>
             <span
               style={{
@@ -370,239 +232,84 @@ export default function Approve() {
       );
 
       // Show the DistributeTo components
-      if (id === showDistributeTo) {
-        // build the option element for each user
-        let optionsArray = [];
-        optionsArray[0] = (
-          <option key={0} value={`<Select User>`}>
-            {`<Select User>`}
-          </option>
-        );
-        let memberDistributionRow = <div></div>;
-
-        // Build the Member Distribution Row if the task has a submitted status
-        if (taskStatus !== "Submitted") {
-          for (let i = 0; i < users.length; i++) {
-            optionsArray[i + 1] = (
-              <option key={i + 1} value={users[i].fullNameDisplay}>
-                {users[i].fullNameDisplay}
-              </option>
-            );
-          }
-          memberDistributionRow = (
-            <div>
-              <form onSubmit={submit}>
-                {inputFields.map((input, index) => {
-                  return (
-                    <div key={index}>
-                      <span
-                        style={{
-                          fontSize: "small",
-                          fontWeight: "bold",
-                          padding: "20px 20px 2px 20px",
-                        }}
-                      >
-                        <select
-                          name="member"
-                          value={input.member}
-                          onChange={(event) => handleFormChange(index, event)}
-                        >
-                          <>{optionsArray}</>
-                        </select>
-                      </span>
-                      <span
-                        style={{
-                          fontSize: "small",
-                          fontWeight: "bold",
-                          padding: "0px 2px 2px 100px",
-                        }}
-                      >
-                        <input
-                          type="text"
-                          placeholder="Amount"
-                          name="amount"
-                          value={input.amount}
-                          onChange={(event) => handleFormChange(index, event)}
-                        />
-                      </span>
-                      <span
-                        style={{
-                          fontSize: "small",
-                          fontWeight: "bold",
-                          padding: "0px 2px 2px 100px",
-                        }}
-                      >
-                        <button onClick={() => removeFields(index)}>
-                          Remove
-                        </button>
-                      </span>
-                    </div>
+      if (id !== showDistributeTo) {
+        //} else {
+        //if (taskStatus !== "Submitted") {
+        // Add button row
+        buttonRow = (
+          <div
+            style={{
+              paddingTop: "20px",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <span style={{ padding: "0px 2px 25px 0px" }}>
+              <button
+                className={styles.btn}
+                onClick={async () => {
+                  const confirmBox = window.confirm(
+                    `Confirm approval of full amount ${amount}`
                   );
-                })}
-              </form>
-              <div style={{ padding: "25px 2px 25px 250px" }}>
-                <span style={{ padding: "0px 10px 3px 0px" }}>
-                  <button className={styles.btn} onClick={addFields}>
-                    Add
-                  </button>
-                </span>
-                <span style={{ padding: "25px 2px 25px 0px" }}>
-                  <button className={styles.btn} onClick={submit}>
-                    Submit
-                  </button>
-                </span>
-              </div>
-            </div>
-          );
-          //}
+                  if (confirmBox === true) {
+                    const compose = await getCompose(connection.selfID.did);
 
-          // build distribute components
-          distributeComponents = (
-            <div>
-              <div
-                style={{
-                  fontSize: "medium",
-                  fontWeight: "bold",
-                  padding: "0px 2px 15px 100px",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "medium",
-                    fontWeight: "bold",
-                    padding: "0px 5px 40px 10px",
-                  }}
-                >
-                  Remaining funds to be distributed:
-                </span>
-                <span
-                  style={{
-                    fontSize: "medium",
-                    fontWeight: "bold",
-                    padding: "0px 2px 20px 20px",
-                  }}
-                >
-                  {(approvedAmount - distributedAmount).toFixed(2)}
-                </span>
-              </div>
-              <div>
-                <span
-                  style={{
-                    fontSize: "large",
-                    fontWeight: "bold",
-                    padding: "0px 2px 15px 50px",
-                  }}
-                >
-                  Member
-                </span>
-                <span
-                  style={{
-                    fontSize: "large",
-                    fontWeight: "bold",
-                    padding: "0px 2px 2px 175px",
-                  }}
-                >
-                  Amount (USD)
-                </span>
-              </div>
-              {memberDistributionRow}
-            </div>
-          );
-        }
-      } else {
-        if (taskStatus !== "Submitted") {
-          // Add button row
-          buttonRow = (
-            <div
-              style={{
-                paddingTop: "20px",
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <span style={{ padding: "0px 2px 25px 0px" }}>
-                <button
-                  className={styles.btn}
-                  onClick={async () => {
-                    if (approved) {
-                      let index = tasks.findIndex(
-                        (task) => task.id === activeTask.id
-                      );
+                    // Create the "Approved" Claim
+                    const approvedVariables = {
+                      claim: task,
+                      subject: "<wallet>",
+                      amount: Number(credit),
+                      amountUnits: "USDC",
+                      source: source,
+                      effective_date: effectiveDate,
+                      root_claim_id,
+                    };
 
+                    const approvedResponse = await createClaim(
+                      compose,
+                      approvedVariables
+                    );
+                    if (approvedResponse.message == "SUCCESS") {
+                      root_claim_id = approvedResponse.streamID;
+                      setRootClaimID(approvedResponse.streamID);
+                      setActiveTask({
+                        task: task,
+                        id: id,
+                        effectiveDate: effectiveDate,
+                        source: source,
+                      });
+
+                      let index = tasks.findIndex((item) => item.id === id);
                       if (index >= 0) {
-                        tasks[index].message = "Task has already been approved";
+                        tasks[index].taskStatus = "Approved";
+                        tasks[index].approvedAmount = Number(amount);
+                        tasks[
+                          index
+                        ].message = `Approved Stream ID:  ${approvedResponse.streamID}`;
                       }
                       setTasks(tasks);
+                      setApproved(true);
+                      setShowDistributeTo(id);
                     } else {
-                      const confirmBox = window.confirm(
-                        `Confirm approval of full amount ${amount}`
+                      // There was an error created the Approved Claim
+                      console.error(
+                        `onClick bad response: ${approvedResponse.errors}`
                       );
-                      if (confirmBox === true) {
-                        const compose = await getCompose(connection.selfID.did);
-
-                        // Create the "Approved" Claim
-                        const approvedVariables = {
-                          claim: task,
-                          subject: subject,
-                          amount: Number(credit),
-                          amountUnits: "ETH",
-                          source: source,
-                          effective_date: effectiveDate,
-                          root_claim_id,
-                        };
-
-                        const approvedResponse = await createClaim(
-                          compose,
-                          approvedVariables
-                        );
-                        if (approvedResponse.message == "SUCCESS") {
-                          console.log("Approved Review - Success!");
-                          root_claim_id = approvedResponse.streamID;
-                          setRootClaimID(approvedResponse.streamID);
-                          setActiveTask({
-                            task: task,
-                            id: id,
-                            effectiveDate: effectiveDate,
-                            source: source,
-                          });
-
-                          console.log(`Active Task ID:  ${id}`);
-                          let index = tasks.findIndex((item) => item.id === id);
-                          console.log(`Index value:  ${index}`);
-                          if (index >= 0) {
-                            console.log("setting task status to Approved");
-                            tasks[index].taskStatus =
-                              "Approved and Ready to Distribute";
-                            tasks[index].approvedAmount = Number(amount);
-                            tasks[
-                              index
-                            ].message = `Approved Stream ID:  ${approvedResponse.streamID}`;
-                          }
-                          setTasks(tasks);
-                          setApproved(true);
-                          setShowDistributeTo(id);
-                        } else {
-                          // There was an error created the Approved Claim
-                          console.log(
-                            `onClick bad response: ${approvedResponse.errors}`
-                          );
-                          let index = tasks.findIndex((item) => item.id === id);
-                          if (index >= 0) {
-                            tasks[index].message = `approvedResponse.message`;
-                          }
-                          setTasks(tasks);
-                          setApproved(false);
-                        }
+                      let index = tasks.findIndex((item) => item.id === id);
+                      if (index >= 0) {
+                        tasks[index].message = `approvedResponse.message`;
                       }
+                      setTasks(tasks);
+                      setApproved(false);
                     }
-                  }}
-                >
-                  Approve
-                </button>
-              </span>
-            </div>
-          );
-        }
+                  }
+                }}
+              >
+                Approve
+              </button>
+            </span>
+          </div>
+        );
       }
 
       return (
@@ -716,15 +423,24 @@ export default function Approve() {
               <span>Total Distributed Amount: </span>
               <span>{totalDistributedAmt}</span>
             </div>
+            <div>
+              <span
+                style={{
+                  fontSize: "small",
+                  fontStyle: "italic",
+                  padding: "100px 5px 2px 370px",
+                }}
+              >
+                (All amounts are in USDC)
+              </span>
+            </div>
             <div>{tasksComponent}</div>
             <div
               style={{
                 margin: 0.0,
                 padding: 10.0,
               }}
-            >
-              <p></p>
-            </div>
+            ></div>
           </div>
         )}
       </main>

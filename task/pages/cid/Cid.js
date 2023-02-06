@@ -9,44 +9,21 @@ const inter = Inter({ subsets: ["latin"] });
 
 async function getCID(streamID) {
   try {
-    /*
-    const response = await fetch("/api/cid", {
-      method: "POST",
-      body: JSON.stringify(streamID),
-    });
-    console.log("Get CID Returned");
-    */
-
     fetch("/api/cid", {
       method: "POST",
       body: JSON.stringify(streamID),
     })
       .then((res) => res.json())
       .then((b) => {
-        console.log(`b.cid:  ${JSON.stringify(b)}`);
         return b.cid;
       });
-
-    //return response.json({ response });
-    //return response.json();
-    //console.log(`getCID:  Response:  ${JSON.stringify(response)}`);
-    //console.log(`getting json`);
-    //const myjson = response.json.Cid;
-
-    //console.log(
-    //  `getCID response stringified after getting in json format:  ${JSON.stringify(
-    //    response
-    //  )}`
-    //);
-    //return response;
   } catch (err) {
-    console.log(`getCID ERROR: - ${err}`);
+    console.error(`getCID ERROR: - ${err}`);
     throw new Error("Unable to retrieve stream");
   }
 }
 
 export default function Cid(props) {
-  //const [connection] = useViewerConnection();
   const [streamID, setStreamID] = useState("");
   const [streamCID, setStreamCID] = useState("");
 
@@ -55,7 +32,6 @@ export default function Cid(props) {
   return (
     <main className={styles.claimMain}>
       {
-        //<div style={{ display: "flex" }} className={inter.className}>
         <div className={styles.grid} style={{ margin: "60px 5px 0px 70px" }}>
           <form className={styles.claimForm}>
             <label htmlFor="streamID">StreamID: </label>
