@@ -67,7 +67,9 @@ fn run() -> Result<(), Box<dyn Error>> {
                 // if claim is earned claim that belongs to current root
                 if e_claim.rootClaimId == root_id.clone() {
                     // // get earned claims address
-                     let add: String = e_claim.subject.clone();
+                    let add: String = e_claim.subject.clone();
+                     // check if the address is an empty string signifying the claim is a root claim
+                    if add != "" {
                     // get earned claims value amount
                     let val: u64 = e_claim.amount;
                     // get previously stored eaned root amount for the specific root ID
@@ -80,10 +82,8 @@ fn run() -> Result<(), Box<dyn Error>> {
                     let prev_val = accounts.get(&add).copied().unwrap_or(0);
                     // add previous amount to new amount
                     let new_val = prev_val + val;
-                    // check if the address is an empty string signifying the claim is a root claim
-                    if add != "" {
-                        //map new amount to the claiments address
-                        accounts.insert(add, new_val);
+                    //map new amount to the claiments address
+                    accounts.insert(add, new_val);
                     }
                  }
             }

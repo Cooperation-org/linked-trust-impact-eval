@@ -1,7 +1,7 @@
 test1.json : QmSCMeGh17KJWA9VHPftWqA1xdWM7McVtt3azxH3aenp1X
 test2.json : QmZhCRWWv8x6zJKhUKwnDNzerWoUaAjyeD4aSY8tGz6qE4
 test3.json : QmT3sHvzDBV53WqY2Z2Gt5U9zFPZYHKHMSKghbbkxt3zsM
-claim.jsom : QmTFcE6qwbpN5YozkR7u8yztZGYYjAztuxeF3VQMpAJwh1
+claim.json : QmTFcE6qwbpN5YozkR7u8yztZGYYjAztuxeF3VQMpAJwh1
 
 
 ## Updated Bacalhau rust run command:
