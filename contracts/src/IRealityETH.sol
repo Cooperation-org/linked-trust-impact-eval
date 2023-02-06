@@ -25,7 +25,7 @@ interface IRealityETH is IBalanceHolder {
      function createTemplate (string calldata content) external returns (uint256);
      function notifyOfArbitrationRequest (bytes32 question_id, address requester, uint256 max_previous) external;
      function setQuestionFee (uint256 fee) external;
-     function submitAnswerByArbitrator (bytes32 question_id, bytes32 answer, addressS answerer) external;
+     function submitAnswerByArbitrator (bytes32 question_id, bytes32 answer, address answerer) external;
      function submitAnswerReveal (bytes32 question_id, bytes32 answer, uint256 nonce, uint256 bond) external;
      function askQuestion (uint256 template_id, string calldata question, address arbitrator, uint32 timeout, uint32 opening_ts, uint256 nonce) external payable returns (bytes32);
      function askQuestionWithMinBond (uint256 template_id, string calldata question, address arbitrator, uint32 timeout, uint32 opening_ts, uint256 nonce, uint256 min_bond) external payable returns (bytes32);
