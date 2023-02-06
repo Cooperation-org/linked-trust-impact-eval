@@ -6,7 +6,6 @@ COPY package.json package-lock.json ./
 
 RUN ["npm", "install"]
 
-COPY ./.next ./.next
 COPY ./components ./components
 COPY ./public ./public
 COPY ./pages ./pages

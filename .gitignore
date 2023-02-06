@@ -6,3 +6,6 @@ task/.env
 .env
 task/data/user_wallets.json
 task/pages/api/simple.json
+node_modules
+wasm_results
+jobID.txt
