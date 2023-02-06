@@ -1,4 +1,4 @@
-version: '3.7'
+version: "3.7"
 
 services:
   composedb:
@@ -10,20 +10,28 @@ services:
     environment:
       GET_QUERY_PORT: 8000
       ADMIN_DIDS: did:key:z6Mkjs4ehQbTczpBKykv1jtJcxaFmyt2Ssd6wmT4K3xjcmAD
-      DB_PATH: /root/.ceramic/indexing.sqlite 
+      DB_PATH: /root/.ceramic/indexing.sqlite
     volumes:
       - ./composedb/app:/usr/src/app
-  
+
   task:
     build:
       context: ./task
     ports:
       - 3000:8080
-    environment:
-      PORT: 8080
-      DID_PRIVATE_KEY: 59e83c249b8947d1524a3f5f66326c78759c86d75573027e7bef571c3fddfb90
-      # GITHUB_USER_MODEL_STREAM_ID: kjzl6hvfrbw6c5no55wlukc496fea0iujswirvarqnode65vmh5fjb2w926sqph 
-      CERAMIC_NODE_URL: http://composedb:7007
-      CERAMIC_QUERY_URL: http://composedb:8000
-      # COMPOSITE_FILE_NAME: github_user_composite.json
+    env_file: ./.env
+    #environment:
+    #  PORT: 8080
+    #  DID_PRIVATE_KEY: 59e83c249b8947d1524a3f5f66326c78759c86d75573027e7bef571c3fddfb90
+    # GITHUB_USER_MODEL_STREAM_ID: kjzl6hvfrbw6c5no55wlukc496fea0iujswirvarqnode65vmh5fjb2w926sqph
+    #  CERAMIC_NODE_URL: http://composedb:7007
+    #  CERAMIC_QUERY_URL: http://composedb:8000
+    # TAIGA Variables
+    #  TAIGA_ID: "mzaremskas@comcast.net"
+    #  TAIGA_PWD: "y9nm6xfnhstdesr6cg"
+    #  TAIGA_TOKEN: "eyJ1c2VyX2F1dGhlbnRpY2F0aW9uX2lkIjozMH0:1pJcta:MjOih4U-QmdwBxmx5RomD-kysr0"
+    #  TAIGA_PROJECT_ID: 36
+    #  TAIGA_POINTS_FACTOR: .2
+
+    # COMPOSITE_FILE_NAME: github_user_composite.json
     command: ["npm", "start"]

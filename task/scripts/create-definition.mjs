@@ -5,7 +5,7 @@ const ceramic = new CeramicClient("http://localhost:7007");
 try {
   await writeEncodedCompositeRuntime(
     ceramic,
-    "claim-composite.json",
+    "ie-claim-composite.json",
     "__generated__/definition.js"
   );
   console.log(

@@ -8,6 +8,11 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const stream = await ceramic.loadStream(req.body);
-  const streamLog = stream.state.log;
-  res.status(200).json(streamLog);
+  var cids: (string | string)[] = [];
+  for (let i = 0; i < stream.state.log.length; i++) {
+    cids[i] += { cid: [stream.state.log[i].cid.toString()] };
+  }
+  const cidStr = stream.state.log[1].cid.toString();
+  const cidJson = { cid: cidStr };
+  return res.status(200).json(stream.state.log[1].cid.toString());
 }

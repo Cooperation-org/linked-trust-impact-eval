@@ -9,9 +9,7 @@ RUN ["npm", "install"]
 COPY ./components ./components
 COPY ./public ./public
 COPY ./pages ./pages
-COPY ./prisma ./prisma
 COPY ./public ./public
-COPY ./db ./db
 COPY ./styles ./styles
 COPY ./next.config.js ./next.config.js
 COPY ./compose ./compose

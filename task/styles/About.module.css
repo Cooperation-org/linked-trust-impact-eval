@@ -6,15 +6,15 @@
   max-width: 800px;
   margin: 3rem auto;
 }
+
 .title {
-  font-family: "Montserrat", sans-serif;
+  font-family: Roboto, sans-serif;
   font-weight: 400;
 }
 .paragraf {
-  font-family: "Montserrat", sans-serif;
+  font-family: Roboto, sans-serif;
   font-weight: 300;
 }
-
 @media (max-width: 600px) {
   .grid {
     width: 100%;

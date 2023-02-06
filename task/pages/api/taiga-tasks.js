@@ -19,7 +19,7 @@ export default async function handler(req, res) {
       throw new Error(response.statusText);
     }
     const taskList = await response.json();
-    console.log(`getTask Response:  ${JSON.stringify(taskList)} `);
+
     return res.status(200).json(taskList);
   }
 }

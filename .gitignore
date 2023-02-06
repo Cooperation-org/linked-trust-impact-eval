@@ -1,8 +1,11 @@
-task/prisma/dev.db
-node_modules
-wasm_results
-jobID.txt
 task/test_data/cid1.json
 task/test_data/cid2.json
 task/test_data/cid3.json
 task/test_data/cid4.json
+task/.env
+.env
+task/data/user_wallets.json
+task/pages/api/simple.json
+node_modules
+wasm_results
+jobID.txt
