@@ -78,6 +78,7 @@ export default function Layout({ children }) {
   const styles = {
     display: "flex",
     flexDirection: "row",
+    justifyContent: "center",
   };
   return (
     <>
