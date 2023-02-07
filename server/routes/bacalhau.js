@@ -1,18 +1,19 @@
 var express = require("express");
 var router = express.Router();
-const { execSync, spawn } = require("node:child_process");
+const { execSync } = require("node:child_process");
 
-router.post("/", function(req, res, next) {
+router.post("/", function (req, res, next) {
   const body = req.body;
-  console.log(body.cid);
   const cid = body.cid;
 
-  execSync("bash bacalhau.sh " + cid, error => {
-    if (error) {
-      console.log(`error: ${error.message}`);
-      return;
-    }
-  });
+  try {
+    const cmd = "bash bacalhau.sh " + cid;
+    const data = execSync(cmd);
+    console.log(data.toString());
+  } catch (err) {
+    console.error(`error: ${err.message}`);
+    return res.status(500).json({ message: "Something went wrong!" });
+  }
 
   setTimeout(() => {
     let root = require("../wasm_results/combined_results/outputs/root.json");
