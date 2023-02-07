@@ -1,13 +1,13 @@
 var express = require("express");
 var router = express.Router();
-const { exec, spawn } = require("node:child_process");
+const { execSync, spawn } = require("node:child_process");
 
 router.post("/", function(req, res, next) {
   const body = req.body;
-  console.log(body.completedJobsArray);
-  const cid = body.completedJobsArray;
+  console.log(body.cid);
+  const cid = body.cid;
 
-  exec("bash bacalhau.sh " + cid, error => {
+  execSync("bash bacalhau.sh " + cid, error => {
     if (error) {
       console.log(`error: ${error.message}`);
       return;
