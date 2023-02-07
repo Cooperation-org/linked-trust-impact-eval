@@ -9,3 +9,5 @@ task/pages/api/simple.json
 node_modules
 wasm_results
 jobID.txt
+.vscode
+task/claims

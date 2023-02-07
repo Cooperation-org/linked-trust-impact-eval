@@ -11,20 +11,20 @@ export const CREATE_CLAIM = `
   mutation (
     $claim: String!
     $subject: String!
-    $root_claim_id: String
+    $rootClaimId: String
     $amount: Int
     $source: String
-    $effective_date: String!
+    $effectiveDate: Int!
   ){
     createIEClaim(
       input: {
         content: {
           claim: $claim
           subject: $subject
-          root_claim_id: $root_claim_id
+          rootClaimId: $rootClaimId
           amount: $amount
           source: $source
-          effective_date: $effective_date
+          effectiveDate: $effectiveDate
         }
       }
     ){
@@ -34,15 +34,15 @@ export const CREATE_CLAIM = `
         subject
         amount
         source
-        root_claim_id
-        effective_date
+        rootClaimId
+        effectiveDate
       }
     }
   }
 `;
 
 const credit = 0;
-var root_claim_id = " ";
+var rootClaimId = " ";
 
 async function createClaim(compose, variables) {
   const response = { message: "", streamID: "" };
@@ -52,7 +52,7 @@ async function createClaim(compose, variables) {
     response.message = "SUCCESS";
   } else {
     response.message = `Error creating persisting ${composeDBResult.errors}`;
-    console.error(`review.js:createClaim - ERROR ${composeDBResult.errors}`);
+    console.error(`approve.js:createClaim - ERROR ${composeDBResult.errors}`);
   }
   return response;
 }
@@ -261,8 +261,8 @@ export default function Approve() {
                       amount: Number(credit),
                       amountUnits: "USDC",
                       source: source,
-                      effective_date: effectiveDate,
-                      root_claim_id,
+                      effectiveDate,
+                      rootClaimId,
                     };
 
                     const approvedResponse = await createClaim(
@@ -270,12 +270,12 @@ export default function Approve() {
                       approvedVariables
                     );
                     if (approvedResponse.message == "SUCCESS") {
-                      root_claim_id = approvedResponse.streamID;
+                      rootClaimId = approvedResponse.streamID;
                       setRootClaimID(approvedResponse.streamID);
                       setActiveTask({
-                        task: task,
-                        id: id,
-                        effectiveDate: effectiveDate,
+                        task,
+                        id,
+                        effectiveDate,
                         source: source,
                       });
 

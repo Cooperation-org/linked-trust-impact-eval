@@ -11,18 +11,18 @@ export const CREATE_CLAIM = `
   mutation (
     $claim: String!
     $subject: String!
-    $root_claim_id: String
+    $rootClaimId: String
     $amount: Int
-    $effective_date: String!
+    $effectiveDate: String!
   ){
     createIEClaim(
       input: {
         content: {
           claim: $claim
           subject: $subject
-          root_claim_id: $root_claim_id
+          rootClaimId: $rootClaimId
           amount: $amount
-          effective_date: $effective_date
+          effectiveDate: $effectiveDate
         }
       }
     ){
@@ -31,8 +31,8 @@ export const CREATE_CLAIM = `
         claim
         subject
         amount
-        root_claim_id
-        effective_date
+        rootClaimId
+        effectiveDate
       }
     }
   }
@@ -167,7 +167,7 @@ export default function Distribute() {
             amount: parseInt(inputFields[i].amount),
             amountUnits: "USDC",
             source: activeTask.source,
-            effective_date: activeTask.effectiveDate,
+            effectiveDate: activeTask.effectiveDate,
             rootClaimID,
           };
           const earnedResponse = await createClaim(compose, earned_variables);
@@ -529,10 +529,10 @@ export default function Distribute() {
                   className={styles.btn}
                   onClick={async () => {
                     setActiveTask({
-                      task: task,
-                      id: id,
-                      effectiveDate: effectiveDate,
-                      source: source,
+                      task,
+                      id,
+                      effectiveDate,
+                      source,
                     });
                     let index = tasks.findIndex((item) => item.id === id);
                     if (index >= 0) {
