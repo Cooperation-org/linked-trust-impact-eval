@@ -55,7 +55,7 @@ contract MerkleSHA256 {
   @return bool whether or not the leaf exists in the root
   */
   function verify(
-    bytes32 root,
+    string memory root,
     string memory leaf,
     string[] memory leaves,
     uint256 position
@@ -81,6 +81,6 @@ contract MerkleSHA256 {
         computedHash = stringToHash(computedHash, proofElement);
       }
     }
-  return sha256(abi.encodePacked(computedHash)) == sha256(abi.encodePacked(toHex(root)));
+  return sha256(abi.encodePacked(computedHash)) == sha256(abi.encodePacked(root));
   }
 }

@@ -5,7 +5,6 @@ import "forge-std/Test.sol";
 import "../src/Wrapper.sol";
 import "../src/mocks/RealityMock.sol";
 import "../src/mocks/TestERC20.sol";
-import "forge-std/console.sol";
 
 
 contract WrapperTest is Test {
@@ -14,7 +13,7 @@ contract WrapperTest is Test {
   TestERC20 public token;
 
 
-  bytes32 root = 0x1ad4e33c36214418318fdbec70fe465979e606717c353567de235edf1bf98777;
+  string root = "0x1ad4e33c36214418318fdbec70fe465979e606717c353567de235edf1bf98777";
   string[] public tree = ["0x1413862C2B7054CDbfdc181B83962CB0FC11fD92-25","0x7fa9385be102ac3eac297483dd6233d62b3e1496-75"];
 
   function setUp() public {
@@ -25,7 +24,6 @@ contract WrapperTest is Test {
 
   function testAddressToString() public {
     string memory leaf = wrapper.addressConcatLeaf(msg.sender, 75);
-    console.logString(leaf);
     assertEq(leaf, "0x7fa9385be102ac3eac297483dd6233d62b3e1496-75");
   }
 

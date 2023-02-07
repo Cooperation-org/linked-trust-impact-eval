@@ -8,17 +8,16 @@ import "openzeppelin-contracts/contracts/utils/Strings.sol";
 import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
 
-import "forge-std/console.sol";
-
 
 contract Wrapper is IWrapper, MerkleSHA256, Ownable{ // is IWrapper
     uint32 public challengePeriod = 86400; // 1 day
     address public arbitrator = 0x0000000000000000000000000000000000000000; //kleros
     string public space = "-";
-    mapping(uint => bytes32) public mapDateRoot;
+    mapping(uint => string) public mapDateRoot;
+    mapping(uint => bool) public rootExists;
     mapping(uint => bytes32) public mapDateQuestionID;
     mapping(uint =>  string[]) public mapDateTree;
-    mapping(bytes32 => uint256) public mapRootToDate;
+    mapping(string => uint256) public mapRootToDate;
     mapping(uint => bool) public mapDateToAnswer;
     mapping(uint => mapping(address => bool)) public mapDateAddressPay;
 
@@ -45,12 +44,13 @@ contract Wrapper is IWrapper, MerkleSHA256, Ownable{ // is IWrapper
     @param _treeHash is an array of strings which are hashes for the merkle tree
     @return is a bytes32 Question ID from reality.eth
    */
-    function postQuestion(bytes32 _merkleroot, string[] memory _treeHash) external onlyOwner returns(uint256){ // returns bytes32 when it shows up
+    function postQuestion(string memory _merkleroot, string[] memory _treeHash) external onlyOwner returns(uint256){ // returns bytes32 when it shows up
         bytes memory output;
         uint256 effectiveDate = uint256(block.timestamp);
         mapRootToDate[_merkleroot] = effectiveDate;
         mapDateTree[effectiveDate] = _treeHash; // not confirmed, will be confirmed in the next function
         mapDateRoot[effectiveDate] = _merkleroot;
+        rootExists[effectiveDate] = true;
         for (uint256 i = 0; i < _treeHash.length; i++) {
             output = (abi.encodePacked(output,"\"", _treeHash[i], "\","));
             string(output);
@@ -82,7 +82,7 @@ contract Wrapper is IWrapper, MerkleSHA256, Ownable{ // is IWrapper
     @param _effectiveDate is the date the merkleroot and tree for a specific question are stored to
     */
     function checkAnswer(uint _effectiveDate) public {
-      require(mapDateRoot[_effectiveDate] != 0x0000000000000000000000000000000000000000000000000000000000000000, "No Root Stored for that date");
+      require(rootExists[_effectiveDate], "No Root Stored for that date");
       require(mapDateToAnswer[_effectiveDate] == false, "Answer has been checked");
         bytes32 answer = iRealityETH.getFinalAnswer(mapDateQuestionID[_effectiveDate]);
         if (answer == 0x0000000000000000000000000000000000000000000000000000000000000001){
@@ -110,7 +110,7 @@ contract Wrapper is IWrapper, MerkleSHA256, Ownable{ // is IWrapper
         checkAnswer(_effectiveDate);
       }
       string[] memory tree = mapDateTree[_effectiveDate];
-      bytes32 root = mapDateRoot[_effectiveDate];
+      string memory root = mapDateRoot[_effectiveDate];
       string memory leaf = addressConcatLeaf(msg.sender, _amountEx);
       require(mapDateAddressPay[_effectiveDate][msg.sender] == false , "Caller already paid");
       bool correct = verify(root, leaf, tree, _position);
@@ -148,7 +148,7 @@ contract Wrapper is IWrapper, MerkleSHA256, Ownable{ // is IWrapper
     @notice getRootByDate is used to retrieve a specific root by the Date used to store it
     @param _effectiveDate is the date used to store the tree
     */
-    function getRootByDate(uint _effectiveDate) external view returns (bytes32) {
+    function getRootByDate(uint _effectiveDate) external view returns (string memory) {
       return mapDateRoot[_effectiveDate];
     }
 
@@ -164,7 +164,7 @@ contract Wrapper is IWrapper, MerkleSHA256, Ownable{ // is IWrapper
     @notice getDateByRoot is used to retrieve a specific Date by the Root used to store it
     @param _root is the root used to store the date
     */
-    function getDateByRoot(bytes32 _root) external view returns (uint256) {
+    function getDateByRoot(string memory _root) external view returns (uint256) {
       return mapRootToDate[_root];
     }
 

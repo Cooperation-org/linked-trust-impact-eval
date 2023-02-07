@@ -7,7 +7,7 @@ import "../src/MerkleSHA256.sol";
 contract MerkleSHA256Test is Test {
     MerkleSHA256 public merkleSHA;
 
-    bytes32 public root = 0xb6a5508696541a52a1d2ab60952234050efc34e49c68e19f4389d10dca9e4c46;
+    string public root = "0xb6a5508696541a52a1d2ab60952234050efc34e49c68e19f4389d10dca9e4c46";
     string[] public tree =    [
         "0x8584e54df79d9ea3216195ce034977968f01457c100",
         "0x624ec4a3ffa86bcef4d06706034d1fddbc9f56b4100",
