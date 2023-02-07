@@ -1,6 +1,9 @@
 # Impact Evaluator - Admin Console
 
 **Description**:
+This is a reference application that completes the full lifecycle of writing impact claims onto Ceramic ComposeDB, computing the rewards in Bacalhau and distributing rewards. For every "round", the wrapper contract will put the result on-chain using Gnosis safe. When all wallet owners approve the transactions, the rewards will be distributed.
+
+The intent is to support pluggable sources for impact claim data. This POC implementation specifically extracts claim data from an open source task tracker, in this case Taiga, and allows the claimants and approvers to sign the data via Ceramic. The implementation in this repository is a working orchestrator that triggers the data flows to happen in a transparent and traceable way.
 
 ## Dependencies
 
@@ -8,150 +11,51 @@
 - Next.js
 - Prisma/SQLite
 
-## Installation and Configuration
+## Installation
 
-The application can either be run inside a docker container or it can be deployed locally on a developer machine.
-
-- [Installation instructions for Docker](#running-admin-console-and-ceramic-composedb-inside-a-docker-container)
-- [Installation instructions to run locally](#running-admin-console-and-ceramic-composedb-locally)
-
-### Running Admin Console and Ceramic composeDB inside a Docker Container
-
-#### Create and Populate .env file
-
-Create a .env file and place it in the project root directory. The .env file should have the following variables set:
-
-```
-TAIGA_ID="<your taiga id>"
-TAIGA_PWD = "<your taiga password>"
-TAIGA_TOKEN="<your taiga auth token>"
-TAIGA_PROJECT_ID=36
-TAIGA_POINTS_FACTOR=.2
-USER_WALLET=<your public wallet address>
-DID_PRIVATE_KEY=59e83c249b8947d1524a3f5f66326c78759c86d75573027e7bef571c3fddfb90
-CERAMIC_NODE_URL=http://composedb:7007
-CERAMIC_QUERY_URL=http://composedb:8000
-PORT=8080
-
-```
-
-#### Launch the Docker Container
-
-```
-docker-compose up
-```
-
-#### Deploy the ComposeDB composite
-
-Deploy the composite after all the docker containers are up.
-
-```
-npm run deploy:composite
-```
-
-### Running Admin Console and Ceramic composeDB Locally
-
-#### Install Ceramic composeDB
-
-```
-pnpm add -g @composedb/cli@^0.3.0
-pnpm add -D @composedb/devtools@^0.3.0 @composedb/devtools-node@^0.3.0
-pnpm add @composedb/client@^0.3.0
-pnpm add -D @composedb/types@^0.3.0
-```
-
-#### Configure Ceramic
-
-##### Set environment variable
-
-```
-export CERAMIC_ENABLE_EXPERIMENTAL_COMPOSE_DB='true'
-pnpm dlx @ceramicnetwork/cli daemon
-```
-
-##### Generate a DID private key
-
-```
-composedb did:generate-private-key
-```
-
-##### Getting the DID Value
-
-```
-composedb did:from-private-key [hexadecimal-encoded private key string]
-```
-
-##### Ceramic Configuration File
-
-The Ceramic node configuration file, which defaults to ~/.ceramic/daemon.config.json on Linux, macOS and WSL (Windows Subsystem for Linux), needs to be edited to specify the admin DIDs allowed to set models for indexing, as well as the indexing configuration:
-
-```
-{
-  ...
-  "http-api": {
-    ...
-    "admin-dids": ["did:key:..."]
-  },
-  "indexing": {
-    ...
-    "allow-queries-before-historical-sync": true
-  }
-}
-```
-
-#### NPM .env File
-
-Create a .env.local file and place it in the ./task/ folder. It needs to include the following variables:
-
-```
-CERAMIC_URL = "http://0.0.0.0:7007"
-TAIGA_ID="<your taiga ID>"
-TAIGA_PWD = "<your taiga password>"
-TAIGA_TOKEN="<your taiga auth token>"
-TAIGA_PROJECT_ID=36
-TAIGA_POINTS_FACTOR=.2
-USER_WALLET=<your user wallet address>
-```
-
-##### Start the local Ceramic Node
-
-```
-pnpm dlx @ceramicnetwork/cli daemon
-```
-
-#### Create the Claim composite
-
-##### Converting a Schema to a composite
-
-```
-composedb composite:create ./data/ie_claim.graphql --output=ie-claim-composite.json  --ceramic-url=http://0.0.0.0:7007
-```
-
-##### Compile the Composite into a runtime definition
-
-In order to interact with a composite at runtime, it is first necessary to create a runtime composite definition file that will be used to configure the client.
-
-```
-composedb composite:compile ie-claim-composite.json ie-claim-composite-runtime.json --ceramic-url=http://0.0.0.0:7007
-
-composedb composite:compile ie-claim-composite.json ./__generated__/definition.js --ceramic-url=http://0.0.0.0:7007
-```
-
-##### Deploy the composite
-
-```
-composedb composite:deploy ie-claim-composite.json --ceramic-url=http://0.0.0.0:7007
-```
-
-##### Start the graphQL Server
-
-Start the local server with GraphiQL using the runtime composite:
-
-```
-composedb graphql:server --ceramic-url=http://0.0.0.0:7007 --graphiql --port=5001 ie-claim-composite-runtime.json
-```
+Detailed instructions on how to install, configure, and get the project running can be found here: [INSTALL](INSTALL.md)
 
 ## Usage
+
+### Interacting with the Impact Evaluator Console App
+
+##### Approve Impact Evaluator Claims
+
+A list of claims to be evaluated are retrieved from the source system and presented to the administrator/approver. The list of Tasks/Claims retrieved from the source system based on a set of criteria. In this use case, the source component retrieves any task that is in a "Ready" state. (In this POC implementation the source system is Taiga). Once approved, the Approved Claims are **created in ComposeDB**. As they are persisted to ComposeDB the status in the source system is updated to "in progress".
+
+[As we consider reuse of the console, the source system would become pluggable and the status values will be configurable].
+
+```
+http://localhost:3000/approve/Approve
+```
+
+##### Distribute Impact Evaluator Claims
+
+A list of "Approved" claims are retrieved from the source system and presented to the administrator/approver. The list of Tasks/Claims retrieved from the source system is based on a set of criteria. In this use case, the source component retrieves any task that is in a "Closed" state. (In this POC implementation the source system is Taiga). The administrator has the opportunity to distribute the full amount of the approved claim to one or more users up to the its full approved value. Once submitted, the Earned Claims are **created in ComposeDB**. As they are persisted to ComposeDB the status in the source system is updated to "complete".
+
+[As we consider reuse of the console, the source system would become pluggable and the status values will be configurable].
+
+```
+http://localhost:3000/distribute/Distribute
+```
+
+##### Impact Evaluator Calc
+
+All claims for this "round" are queried from ComposeDB. They are then pinned to web3.storage. The web3.storage CID is then passed Bacalhau Compute to initiate the computation of the impact evaluator. Bacalhau Compute returns a Merkle tree of the rewards.
+
+The response from the Baclahau Calc is then submitted to the Wrapper Contract.
+
+```
+http://localhost:3000/calculate/Calculate.js
+```
+
+##### Retrieve the CID for a Task
+
+Once a Task has been persisted to CeramicDB, you can retrieve the CID for that claim using the Stream ID.
+
+```
+http://localhost:3000/cid/Cid
+```
 
 ### Interacting through the GraphiQL UI
 
@@ -194,30 +98,4 @@ To check the details of the GraphQL schema built from your runtime composite rep
 
 ```
 composedb graphql:schema runtime-composite.json
-```
-
-### Interacting with the Admin Console App
-
-##### Create Tasks/Claims
-
-This is a simple UI that allows you to create a task/claim. These are persisted in a local SQLite database. Once they are created, they can then be reviewed and approved (see below).
-
-```
-http://localhost:3000/tasks
-```
-
-##### Review and approve new Tasks and Claims
-
-This will present a list of Tasks/Claims that have been persisted to a local sqlite database. Once approved, they will be **created in ComposeDB**. As they are persisted to ComposeDB they are also deleted from the local SQLite database.
-
-```
-http://localhost:3000/review
-```
-
-##### Retrieve the CID for a Task
-
-Once a Task has been persisted to CeramicDB, you can retrieve the CID for that claim using the Stream ID.
-
-```
-http://localhost:3000/cid
 ```
