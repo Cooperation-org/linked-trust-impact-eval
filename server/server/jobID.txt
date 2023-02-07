@@ -1,0 +1,21 @@
+Uploading "./bacalhau_compute.wasm" to server to execute command in context, press Ctrl+C to cancel
+Job successfully submitted. Job ID: 2e05b5f0-4bbd-4843-ae58-f386604193e0
+Checking job status... (Enter Ctrl+C to exit at any time, your job will continue running):
+
+	    Communicating with the network  ...       🐟
+[K	    Communicating with the network  ................ done ✅  0.0s
+	       Creating job for submission  ...      🐟 
+	       Creating job for submission  ...     🐟  
+[K	       Creating job for submission  ................ done ✅  0.0s
+	       Finding node(s) for the job  ...    🐟   
+[K	       Finding node(s) for the job  ................ done ✅  0.0s
+	                   Running the job  ...   🐟    
+[K	                   Running the job  ................ err  ❌  0.0s
+
+Error while executing the job.
+
+To download the results, execute:
+  bacalhau get 2e05b5f0-4bbd-4843-ae58-f386604193e0
+
+To get more details about the run, execute:
+  bacalhau describe 2e05b5f0-4bbd-4843-ae58-f386604193e0
