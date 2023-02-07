@@ -15,15 +15,13 @@
   "dependencies": {
     "@composedb/client": "^0.3.1",
     "@next/font": "13.0.7",
-    "@prisma/client": "^4.7.1",
     "@self.id/framework": "^0.4.0",
-    "eslint": "8.29.0",
-    "eslint-config-next": "13.0.7",
+    "minimist": "^1.2.7",
     "next": "13.0.7",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-relay": "^14.1.0",
-    "sqlite3": "^5.1.4"
+    "web3.storage": "^4.4.0"
   },
   "devDependencies": {
     "@ceramicnetwork/http-client": "^2.11.0",
@@ -31,6 +29,8 @@
     "@types/node": "18.11.18",
     "@types/react": "18.0.26",
     "dids": "^3.4.0",
+    "eslint": "^8.33.0",
+    "eslint-config-next": "^13.1.6",
     "key-did-provider-ed25519": "^2.0.1",
     "key-did-resolver": "^2.3.0",
     "uint8arrays": "^4.0.2"

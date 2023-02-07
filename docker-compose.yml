@@ -6,7 +6,7 @@ services:
       context: ./composedb
     ports:
       - 7007:7007
-      - 9000:8000
+      - 8000:8000 
     environment:
       GET_QUERY_PORT: 8000
       ADMIN_DIDS: did:key:z6Mkjs4ehQbTczpBKykv1jtJcxaFmyt2Ssd6wmT4K3xjcmAD
