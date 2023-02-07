@@ -11,3 +11,4 @@ wasm_results
 jobID.txt
 .vscode
 task/claims
+server/jobID.txt~

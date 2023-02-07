@@ -150,7 +150,7 @@ function Bacalhau() {
             </>
           )}
           {claims.length === 0 && !isLoading && <p> No claims found</p>}
-          {cid && (
+          {!isLoading && cid && (
             <div style={{ textAlign: "center" }}>
               <p>
                 CID:<span style={{ fontWeight: "bold" }}> {cid}</span>
@@ -163,8 +163,9 @@ function Bacalhau() {
                   cursor: "pointer",
                 }}
                 onClick={async () => {
+                  setIsLoading(true);
                   try {
-                    const res = await fetch("http://localhost:9000/", {
+                    const res = await fetch("http://localhost:9000/bacalhau", {
                       method: "POST",
                       headers: {
                         "Content-Type": "application/json",
@@ -173,8 +174,12 @@ function Bacalhau() {
                     });
                     const data = await res.json();
                     console.log(data);
+                    const { root } = data;
+                    setBacalhauResponse(root);
                   } catch (err) {
                     console.log(err.message);
+                  } finally {
+                    setIsLoading(false);
                   }
                 }}
               >
