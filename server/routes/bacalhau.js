@@ -2,7 +2,7 @@ var express = require("express");
 var router = express.Router();
 const { execSync } = require("node:child_process");
 
-router.post("/", function (req, res, next) {
+router.post("/", function(req, res, next) {
   const body = req.body;
   const cid = body.cid;
 
@@ -15,7 +15,9 @@ router.post("/", function (req, res, next) {
   }
 
   let root = require("../wasm_results/combined_results/outputs/root.json");
-  res.status(200).send({ root });
+  let tree = require("../wasm_results/combined_results/outputs/treehashed.json");
+
+  res.status(200).send({ root, tree });
 });
 
 module.exports = router;
