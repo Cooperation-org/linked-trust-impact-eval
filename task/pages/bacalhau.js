@@ -12,7 +12,10 @@ async function invokeWrapper() {
   const signer = provider.getSigner();
   console.log("Account:", await signer.getAddress());
   const wrapperContract = new ethers.Contract(wrapperAddress, abi, signer);
-  const dateID = await wrapperContract.postQuestion(merkleroot, treeHash);
+  const dateID = await wrapperContract.postQuestion(
+    bacalhauResponse.root,
+    bacalhauResponse.treeHash
+  );
 }
 
 function Bacalhau() {
