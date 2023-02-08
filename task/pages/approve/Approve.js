@@ -287,6 +287,9 @@ export default function Approve() {
                           index
                         ].message = `Approved Stream ID:  ${approvedResponse.streamID}`;
                       }
+                      let newTotalApprovedAmt = totalApprovedAmt;
+                      newTotalApprovedAmt += Number(amount);
+                      setTotalApprovedAmt(newTotalApprovedAmt);
                       setTasks(tasks);
                       setApproved(true);
                       setShowDistributeTo(id);
@@ -299,6 +302,7 @@ export default function Approve() {
                       if (index >= 0) {
                         tasks[index].message = `approvedResponse.message`;
                       }
+
                       setTasks(tasks);
                       setApproved(false);
                     }
@@ -350,8 +354,7 @@ export default function Approve() {
               }}
             >
               {" "}
-              {task} {" - "}
-              {id}
+              {task}
             </span>
 
             <span
@@ -420,8 +423,8 @@ export default function Approve() {
                 padding: "0px 2px 2px 350px",
               }}
             >
-              <span>Total Distributed Amount: </span>
-              <span>{totalDistributedAmt}</span>
+              <span>Total Approved Amount: </span>
+              <span>{totalApprovedAmt.toFixed(2)}</span>
             </div>
             <div>
               <span

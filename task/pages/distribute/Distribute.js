@@ -127,21 +127,23 @@ export default function Distribute() {
     e.preventDefault();
 
     // Identify the task we are actively working on
-    let index = tasks.findIndex((task) => task.id === activeTask.id);
+    let taskIndex = tasks.findIndex((task) => task.id === activeTask.id);
     let newTasks = tasks;
-    if (index >= 0) {
+    if (taskIndex >= 0) {
       // We don't want to create earned claims for more than the approved amount
       if (
-        Number(tasks[index].distributedAmount) >
-        Number(tasks[index].approvedAmount)
+        Number(tasks[taskIndex].distributedAmount) >
+        Number(tasks[taskIndex].approvedAmount)
       ) {
         return alert("The distributed amount exceeds the approved amount");
       }
+
       // We don't want to process the same task twice...so confirm
-      if (tasks[index].taskStatus === "Submitted") {
+      if (tasks[taskIndex].taskStatus === "Submitted") {
         return alert(`This task has already been submitted`);
       } else {
         let newTotalDistributeAmt = totalDistributedAmt;
+        let newMessage = "";
         for (let i = 0; i < inputFields.length; i++) {
           if (inputFields[i].member === "" || inputFields[i].amount <= 0) {
             return alert(`Please select a user and provide a non-zero amount`);
@@ -149,11 +151,11 @@ export default function Distribute() {
           const compose = await getCompose(connection.selfID.did);
           // Create an "Earned" Claim for each member
           let wallet = "<wallet>";
-          let index = users.findIndex(
+          let userIndex = users.findIndex(
             (user) => user.fullNameDisplay === inputFields[i].member
           );
-          if (index >= 0) {
-            wallet = users[index].walletAddress;
+          if (userIndex >= 0) {
+            wallet = users[userIndex].walletAddress;
           } else {
             console.error(
               "Distribute.js:submit - Did not find wallet for user"
@@ -170,10 +172,16 @@ export default function Distribute() {
           };
           const earnedResponse = await createClaim(compose, earned_variables);
           if (earnedResponse.message == "SUCCESS") {
-            newTasks[
-              index
-            ].message += `\r\nEarned Stream ID for ${inputFields[i].member}: ${earnedResponse.streamID}`;
-            newTasks[index].taskStatus = "Submitted";
+            console.log(
+              `New Tasks for index:  ${taskIndex}:  ${JSON.stringify(
+                newTasks[taskIndex]
+              )}`
+            );
+
+            newMessage += `\r\nEarned Stream ID for ${inputFields[i].member}: ${earnedResponse.streamID}`;
+            newTasks[taskIndex].message = newMessage;
+
+            newTasks[taskIndex].taskStatus = "Submitted";
             newTotalDistributeAmt += Number(inputFields[i].amount);
           } else {
             // There was an error creating the Earned claim
@@ -181,15 +189,17 @@ export default function Distribute() {
               `submit:ERROR creating earned claim:  ${earnedResponse.message} `
             );
             newTasks[
-              index
+              taskIndex
             ].message = `Approved Stream:  ${rootClaimID}. Failed to create Earned Claim for  with error:  ${earnedResponse.message}`;
-            newTasks[index].taskStatus = "Failed";
+            newTasks[taskIndex].taskStatus = "Failed";
           }
         }
+
         setTotalDistributedAmt(newTotalDistributeAmt);
         setApproved(false);
+        setTasks(newTasks);
       }
-      setTasks(newTasks);
+      //setTasks(newTasks);
       let newInputFields = [
         {
           member: "",
@@ -440,7 +450,7 @@ export default function Distribute() {
                     Add
                   </button>
                 </span>
-                <span style={{ padding: "25px 2px 25px 0px" }}>
+                <span style={{ padding: "25px 2px 25px 25px" }}>
                   <button className={styles.btn} onClick={submit}>
                     Submit
                   </button>
@@ -578,8 +588,7 @@ export default function Distribute() {
               }}
             >
               {" "}
-              {task} {" - "}
-              {id}
+              {task}
             </span>
 
             <span
@@ -652,7 +661,7 @@ export default function Distribute() {
               }}
             >
               <span>Total Distributed Amount: </span>
-              <span>{totalDistributedAmt}</span>
+              <span>{totalDistributedAmt.toFixed(2)}</span>
             </div>
             <div>{tasksComponent}</div>
             <div
