@@ -53,17 +53,15 @@ to the Cargo.toml file.
 ## Usage
 
 To run the calculation program locally as a rust program using the test
-claim jsons run one of the following command inside the bacalhauC folder:
+claims json run the following command inside the bacalhauC folder:
 
-`cargo run ./jsons/claim.json`
-or
-`cargo run ./jsons/claim2.json`
+`cargo run ./jsons/inputs`
 
-Running these will produce both the Merkle Tree and Root inside the outputs folder.
+Running this will produce both the Merkle Tree and Root inside the outputs folder.
 
 To run this program on Bacalhau as a WASM image use the command:
 
-`bacalhau wasm run ./bacalhau_compute.wasm -v QmTFcE6qwbpN5YozkR7u8yztZGYYjAztuxeF3VQMpAJwh1:CID1 CID1 | tee jobID.txt`
+`bacalhau wasm run ./bacalhau_compute.wasm -v bafybeidwbw2xgm3elpoeom37oungx6bvopjg4r6n7krj6d6thimbzusadu:CID1 CID1 | tee jobID.txt`
 
 To retrieve the results of your calculation run:
 
@@ -90,7 +88,13 @@ Compiling to WASM can be done with the command:
 
 ## Known issues
 
-Currently this program does not work with IPFS CIDv1 hashs as input. These CIDs begin with `bafy`.
+The compute program expects that the input IPFS CID is a folder with a json in it, not the json itself. Prior versions of this
+program had been designed to work with a CID that directly represented the claims file however this had to be changed due to
+the way web3.storage was uploading the claims.json. Due to this change the program is now limited to ONLY working with
+a json named "claims.json" uploaded to IPFS as a folder not a file.
+
+MAKE SURE THAT THE IPFS CID YOU ARE TRYING TO USE IS A FOLDER CONTAINING
+THE CLAIMS.JSON, NOT JUST THE JSON ITSELF.
 
 ## Getting help
 
