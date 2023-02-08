@@ -1,14 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
-import "forge-std/console.sol";
-
 
 contract MerkleSHA256 {
 
   /**
   @notice toHex16 converts a bytes16 to bytes32
   @param _data is the input bytes16 value
-  @return is the returned bytes32 result
   */
   function toHex16 (bytes16 _data) internal pure returns (bytes32 result) {
       result = bytes32 (_data) & 0xFFFFFFFFFFFFFFFF000000000000000000000000000000000000000000000000 |
@@ -56,9 +53,9 @@ contract MerkleSHA256 {
   @return bool whether or not the leaf exists in the root
   */
   function verify(
-    bytes32 root,
+    string memory root,
     string memory leaf,
-    string[3] memory leaves,
+    string[] memory leaves,
     uint256 position
   )
   public
@@ -82,6 +79,6 @@ contract MerkleSHA256 {
         computedHash = stringToHash(computedHash, proofElement);
       }
     }
-  return sha256(abi.encodePacked(computedHash)) == sha256(abi.encodePacked(toHex(root)));
+  return sha256(abi.encodePacked(computedHash)) == sha256(abi.encodePacked(root));
   }
 }
