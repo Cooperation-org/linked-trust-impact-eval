@@ -8,6 +8,14 @@ const storage = new Web3Storage({ token });
 export default async function handler(req, res) {
   if (req.method === "POST") {
     const { claims, limit } = req.body;
+
+    for (const claim of claims) {
+      console.log(claim);
+      if (!claim["rootClaimId"]) {
+        claim["rootClaimId"] = "";
+      }
+    }
+
     const fileContent = JSON.stringify({ limit, claims });
 
     const targetDirectory = path.join(process.cwd(), "claims");

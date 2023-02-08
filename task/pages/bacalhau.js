@@ -1,47 +1,51 @@
 import React, { useState, useEffect } from "react";
 import Loader from "../components/Loader";
 import { Inter } from "@next/font/google";
+import { ethers } from "ethers";
 let abi = require("../data/abi.json");
 
 const inter = Inter({ subsets: ["latin"] });
 
-async function invokeWrapper() {
+const wrapperAddress = process.env.NEXT_PUBLIC_WRAPPER_CONTRACT_ADDRESS;
+async function invokeWrapper(root, treeHash) {
   const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
-  const wrapperAddress = process.env.WRAPPER_CONTRACT_ADDRESS;
   await provider.send("eth_requestAccounts", []);
   const signer = provider.getSigner();
   console.log("Account:", await signer.getAddress());
-  const wrapperContract = new ethers.Contract(wrapperAddress, abi, signer);
-  const dateID = await wrapperContract.postQuestion(
-    bacalhauResponse.root,
-    bacalhauResponse.treeHash
+  const wrapperContract = new ethers.Contract(
+    wrapperAddress,
+    abi["abi"],
+    signer
   );
+  const dateID = await wrapperContract.postQuestion(root, treeHash);
+  console.log(dateID);
 }
 
 function Bacalhau() {
   const [isLoading, setIsLoading] = useState(false);
-  const [bacalhauResponse, setBacalhauResponse] = useState("");
+  const [bacalhauResponse, setBacalhauResponse] = useState();
   const [claims, setClaims] = useState([]);
   const [cid, setCid] = useState("");
   const [limit, setLimit] = useState();
+  const [hasSubmittedOnChain, setHasSubmittedOnChain] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
     fetch(`http://localhost:8000/get-round-claims/`)
-      .then(res => res.json())
-      .then(data => setClaims(data))
-      .catch(error => console.error("error: ", error))
+      .then((res) => res.json())
+      .then((data) => setClaims(data))
+      .catch((error) => console.error("error: ", error))
       .finally(() => setIsLoading(false));
   }, []);
 
-  const claimsComponents = claims.map(claim => {
+  const claimsComponents = claims.map((claim) => {
     const {
       amount,
       amountUnits,
       claim: claimTitle,
       effectiveDate,
       subject,
-      id
+      id,
     } = claim;
 
     return (
@@ -52,7 +56,7 @@ function Bacalhau() {
           background: "#fff",
           margin: "10px",
           borderRadius: "5px",
-          boxShadow: "1px 10px 22px -5px rgba(0,0,0,0.47)"
+          boxShadow: "1px 10px 22px -5px rgba(0,0,0,0.47)",
         }}
       >
         <div>
@@ -74,7 +78,7 @@ function Bacalhau() {
               weekday: "long",
               year: "numeric",
               month: "short",
-              day: "numeric"
+              day: "numeric",
             })}
           </span>
         </div>
@@ -89,7 +93,7 @@ function Bacalhau() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          padding: "10px"
+          padding: "10px",
         }}
         className={inter.className}
       >
@@ -107,9 +111,9 @@ function Bacalhau() {
                     width: "400px",
                     fontFamily: "inherit",
                     margin: "20px 0",
-                    textAlign: "center"
+                    textAlign: "center",
                   }}
-                  onChange={e => {
+                  onChange={(e) => {
                     setLimit(e.currentTarget.value);
                   }}
                 />
@@ -122,7 +126,7 @@ function Bacalhau() {
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  marginTop: "20px"
+                  marginTop: "20px",
                 }}
               >
                 <button
@@ -130,7 +134,7 @@ function Bacalhau() {
                     padding: "10px 20px",
                     background: "#fff",
                     borderRadius: "5px",
-                    cursor: "pointer"
+                    cursor: "pointer",
                   }}
                   onClick={async () => {
                     if (!limit) {
@@ -144,9 +148,9 @@ function Bacalhau() {
                       const res = await fetch("/api/bacalhau", {
                         method: "POST",
                         headers: {
-                          "Content-Type": "application/json"
+                          "Content-Type": "application/json",
                         },
-                        body: JSON.stringify({ claims, limit: limitAsNumber })
+                        body: JSON.stringify({ claims, limit: limitAsNumber }),
                       });
                       const data = await res.json();
                       const { cid } = data;
@@ -164,7 +168,7 @@ function Bacalhau() {
             </>
           )}
           {claims.length === 0 && !isLoading && <p> No claims found</p>}
-          {!isLoading && cid && (
+          {!isLoading && cid && !bacalhauResponse && (
             <div style={{ textAlign: "center" }}>
               <p>
                 CID:<span style={{ fontWeight: "bold" }}> {cid}</span>
@@ -174,7 +178,7 @@ function Bacalhau() {
                   padding: "10px 20px",
                   background: "#fff",
                   borderRadius: "5px",
-                  cursor: "pointer"
+                  cursor: "pointer",
                 }}
                 onClick={async () => {
                   setIsLoading(true);
@@ -182,14 +186,14 @@ function Bacalhau() {
                     const res = await fetch("http://localhost:9000/bacalhau", {
                       method: "POST",
                       headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
                       },
-                      body: JSON.stringify({ cid })
+                      body: JSON.stringify({ cid }),
                     });
                     const data = await res.json();
                     console.log(data);
-                    const { root } = data;
-                    setBacalhauResponse(root);
+                    const { root, tree } = data;
+                    setBacalhauResponse({ root, tree });
                   } catch (err) {
                     console.log(err.message);
                   } finally {
@@ -201,7 +205,36 @@ function Bacalhau() {
               </button>
             </div>
           )}
-          {!isLoading && <p>{bacalhauResponse}</p>}
+          {!isLoading && bacalhauResponse && (
+            <div style={{ textAlign: "center" }}>
+              <p>Root: {bacalhauResponse.root}</p>
+              <p>Tree: {bacalhauResponse.tree}</p>
+            </div>
+          )}
+          {!isLoading && bacalhauResponse && (
+            <div style={{ textAlign: "center" }}>
+              {!hasSubmittedOnChain && (
+                <button
+                  style={{
+                    padding: "10px 20px",
+                    background: "#fff",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                  }}
+                  onClick={async () => {
+                    await invokeWrapper(
+                      bacalhauResponse.root,
+                      bacalhauResponse.tree
+                    );
+                    setHasSubmittedOnChain(true);
+                  }}
+                >
+                  Submit on chain
+                </button>
+              )}
+              {hasSubmittedOnChain && <p>Submitted on chain</p>}
+            </div>
+          )}
         </header>
       </div>
     </>

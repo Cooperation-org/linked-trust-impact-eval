@@ -59,7 +59,6 @@ def get_claims():
     # This API will be removed once composedb implements the feature to query with fields
     # https://forum.ceramic.network/t/queries-by-fields/260/6
 
-    print("Yes! reached here")
     DB_TABLE = "kjzl6hvfrbw6c66jh4zydcz4cli1309rpvji20gr6kzqnm0raohx3c6oj120qec"  # Should not be hardcoded
     seconds_since_epoch = round(datetime.datetime.now().timestamp())
     query = f'''
