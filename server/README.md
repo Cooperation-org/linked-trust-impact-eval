@@ -37,6 +37,10 @@ both the bacalhau.sh file and the bacalhau.js file found in routes.
 To start the server run:
 `npm start`
 
+to run the bash script independantly cd to the server folder and run:
+
+`bash ./bacalhau.sh bafybeidwbw2xgm3elpoeom37oungx6bvopjg4r6n7krj6d6thimbzusadu`
+
 ## Getting help
 
 If you have questions, concerns, bug reports, etc, please file an issue in
