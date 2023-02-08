@@ -22,6 +22,9 @@ The solution is comprised of three major components.
 [Impact Evaluator Console](./task/README.md)
 Provides a user interface that manages the workflow.
 
+[Impact Evaluator Bacalhau Server](server/README.md)
+Provides and easy method for a front end interface to initiate a Bacalhau program through a fetch request. This method allows for information such as parameters and IPFS CIDs to be passed down to the bacalhau program as well as any returned files to be passed back to the front end.
+
 [Bacalhau Calc](./baclahauC/README.md)
 Performs the award calculations and balances them to the total reward amount in the root claim.
 
