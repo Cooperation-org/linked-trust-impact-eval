@@ -3,8 +3,8 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import "../src/Wrapper.sol";
-import "../src/mocks/RealityMock.sol";
-import "../src/mocks/TestERC20.sol";
+import "../src/RealityMock.sol";
+import "../src/TestERC20.sol";
 
 
 contract WrapperTest is Test {

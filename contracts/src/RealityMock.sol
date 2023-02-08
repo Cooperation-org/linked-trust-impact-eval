@@ -1,4 +1,5 @@
-pragma solidity ^0.8.6;
+//SPDX-License-Identifier: MIT
+pragma solidity >=0.8.17;
 
 /**
 @notice RealityMock contract is built to locally test out the calls to reality.eth
