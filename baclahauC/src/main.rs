@@ -4,6 +4,7 @@ use std::fs;
 use std::str;
 use std::fs::File;
 use std::io::Read;
+use std::path::Path;
 use std::error::Error;
 use std::collections::HashMap;
 use serde::{Serialize, Deserialize};
@@ -39,12 +40,21 @@ fn run() -> Result<(), Box<dyn Error>> {
     let mut leaves: Vec<String> = vec![];
     let mut root_earned = HashMap::new();
     let mut accounts = HashMap::new();
-
     // grab the input json from input volume
     let args: Vec<String> = env::args().collect();
+    //turn CID into string
+    let mut cid: String = args[1].clone().to_owned();
+    //create file name
+    let mut fileName: String = "/claims.json".to_string();
+    //concat CID and file name
+    cid.push_str(&fileName);
+    // create input path
+    let input_path = Path::new(&cid);
     // open it and turn it into a string
-    let mut file = File::open(args[1].clone()).unwrap();
+    let mut file = File::open(input_path).unwrap();
+    //create buffer
     let mut buff = String::new();
+    // read to string
     file.read_to_string(&mut buff).unwrap();
     // instantiate json as usable object
     let claims_jsons: InputJson = serde_json::from_str(&buff).unwrap();
