@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Loader from "../components/Loader";
 import { Inter } from "@next/font/google";
+let abi = require("../data/abi.json");
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -8,17 +9,17 @@ function invokeWrapper() {
   var provider = ethers.providers.getDefaultProvider(process.env.WEB3_PROVIDER);
   var address = process.env.WRAPPER_CONTRACT_ADDRESS;
   var privateKey = process.env.GNOSIS_WALLET_PRIVATE;
-
   var wallet = new ethers.Wallet(privateKey, provider);
 
-  const wrapperAPI = `./abi/contract/Wrapper.sol`;
+  // The abi is imported above from ../data/abi.json
+  //console.log({abi});
   var contract = new ethers.Contract(address, abi, wallet);
-  //var sendPromise = contract.postQuestion("Hello World");
+
   /*
     The following is the signature of the postQuestion function in the wrapper contract
           postQuestion(bytes32 _merkleroot, string[] memory _treeHash) external onlyOwner returns(uint256)
    */
-  var sendPromise = postQuestion(merkleroot, treeHash);
+  var sendPromise = contract.postQuestion(merkleroot, treeHash);
 
   sendPromise.then(function (transaction) {
     console.log(transaction);

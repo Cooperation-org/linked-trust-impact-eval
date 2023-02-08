@@ -1,36 +1,102 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Impact Evaluator Console
 
-## Getting Started
+**Description**: Provides a user interface for the administrators to approve a claim, distribute the award and initation distribution of the award.
 
-First, run the development server:
+## Dependencies
 
-```bash
-npm run dev
-# or
-yarn dev
+- Ceramic ComposeDB
+- Ceramic JS HTTP Client
+- Next.js
+- web3.storage
+- Bacalhau
+- Ether.js
+- Solidity
+
+## Installation
+
+Detailed instructions on how to install, configure, and get Impact Evaluator Console up and running can be found here: [INSTALL](INSTALL.md)
+
+## Usage
+
+### Interacting with the Impact Evaluator Console App
+
+##### Approve Impact Evaluator Claims
+
+A list of claims to be evaluated are retrieved from the source system and presented to the administrator/approver. The list of Tasks/Claims retrieved from the source system based on a set of criteria. In this use case, the source component retrieves any task that is in a "Ready" state. (In this POC implementation the source system is Taiga). Once approved, the Approved Claims are **created in ComposeDB**. As they are persisted to ComposeDB the status in the source system is updated to "in progress".
+
+[As we consider reuse of the console, the source system would become pluggable and the status values will be configurable].
+
+```
+http://localhost:3000/approve/Approve
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+##### Distribute Impact Evaluator Claims
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+A list of "Approved" claims are retrieved from the source system and presented to the administrator/approver. The list of Tasks/Claims retrieved from the source system is based on a set of criteria. In this use case, the source component retrieves any task that is in a "Closed" state. (In this POC implementation the source system is Taiga). The administrator has the opportunity to distribute the full amount of the approved claim to one or more users up to the its full approved value. Once submitted, the Earned Claims are **created in ComposeDB**. As they are persisted to ComposeDB the status in the source system is updated to "complete".
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+[As we consider reuse of the console, the source system would become pluggable and the status values will be configurable].
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+```
+http://localhost:3000/distribute/Distribute
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+##### Impact Evaluator Calc
 
-## Learn More
+All claims for this "round" are queried from ComposeDB. They are then pinned to web3.storage. The web3.storage CID is then passed Bacalhau Compute to initiate the computation of the impact evaluator. Bacalhau Compute returns a Merkle tree of the rewards.
 
-To learn more about Next.js, take a look at the following resources:
+The response from the Baclahau Calc is then submitted to the Wrapper Contract.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+http://localhost:3000/calculate/Calculate.js
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+##### Retrieve the CID for a Task
 
-## Deploy on Vercel
+Once a Task has been persisted to CeramicDB, you can retrieve the CID for that claim using the Stream ID.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+http://localhost:3000/cid/Cid
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+### Interacting through the GraphiQL UI
+
+###### Create an instance of a claim
+
+Launch the graphiQL URL in the browser and run the mutation below:
+
+```
+mutation {
+    createClaim
+        (input: { content: { by: "Steve", claim: "My second Claim", round: "round one", credit: 1 } }) {
+        document {
+            by
+        }
+    }
+}
+```
+
+#### Query the first 10 instances of a claim
+
+Launch the graphiQL URL in the browser and run the query below:
+
+```
+query {
+  ClaimIndex(first: 10) {
+    edges {
+      node {
+        by
+      }
+    }
+  }
+}
+```
+
+### Interacting with ComposeDB Command Line
+
+##### Get the details of the GraphQL Schema
+
+To check the details of the GraphQL schema built from your runtime composite representation, you can use the graphql:schema CLI command:
+
+```
+composedb graphql:schema runtime-composite.json
+```
