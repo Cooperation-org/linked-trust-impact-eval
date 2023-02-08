@@ -107,6 +107,26 @@ TAIGA_POINTS_FACTOR=.2
 USER_WALLET=<your user wallet address>
 ```
 
+#### User Wallet Repository
+
+Create a ./data/user_wallets.json file. It needs to conform to the following structure:
+
+```
+{
+  "source system username 1": {
+    "user": "friendly user name 1",
+    "wallet": "<wallet address>",
+    "note": "freeform note"
+  },
+  "source system username 2": {
+    "user": "friendly user name 2",
+    "wallet": "<wallet address>",
+    "note": "freeform note"
+  },
+  ...
+}
+```
+
 ##### Start the local Ceramic Node
 
 ```

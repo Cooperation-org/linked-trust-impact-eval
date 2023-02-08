@@ -32,9 +32,12 @@ Uses the result of the Bacalhau Calc to release the rewards that have been appro
 
 Each of the components can be installed separately and tested in isolation. However, to perform an end-to-end workflow, all components need to be installed and configured.
 
-Detailed instructions on how to install, configure, and get each of the components up and running can be found here: [INSTALL](INSTALL.md)
+Detailed instructions on how to install, configure, and get each of the components up and running can be found here:
+
 [Impact Evaluator Console](./task/INSTALL.md)
+
 [Bacalhau Calc](./baclahauC/README.md)
+
 [Wrapper Contract](./contracts/README.md)
 
 ## Usage
@@ -43,4 +46,17 @@ Once the components have been installed and configured, the Impact Evaluator Con
 
 ```
 http://localhost:3000/approve/Approve
+
+```
+
+Tasks that have been approved and the work has been complete, can be processed for reward distribution:
+
+```
+http://localhost:3000/distribute/Distribute
+```
+
+Tasks that have been distributed and ready for rewards to be calculated and distributed can be done so using the Payment function:
+
+```
+http://localhost:3000/bacalhau
 ```
