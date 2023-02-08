@@ -5,26 +5,14 @@ let abi = require("../data/abi.json");
 
 const inter = Inter({ subsets: ["latin"] });
 
-function invokeWrapper() {
-  var provider = ethers.providers.getDefaultProvider(process.env.WEB3_PROVIDER);
-  var address = process.env.WRAPPER_CONTRACT_ADDRESS;
-  var privateKey = process.env.GNOSIS_WALLET_PRIVATE;
-  var wallet = new ethers.Wallet(privateKey, provider);
-
-  // The abi is imported above from ../data/abi.json
-  //console.log({abi});
-  var contract = new ethers.Contract(address, abi, wallet);
-
-  /*
-    The following is the signature of the postQuestion function in the wrapper contract
-          postQuestion(bytes32 _merkleroot, string[] memory _treeHash) external onlyOwner returns(uint256)
-   */
-  var sendPromise = contract.postQuestion(merkleroot, treeHash);
-
-  sendPromise.then(function (transaction) {
-    console.log(transaction);
-    return transaction;
-  });
+async function invokeWrapper() {
+  const provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+  const wrapperAddress = process.env.WRAPPER_CONTRACT_ADDRESS;
+  await provider.send("eth_requestAccounts", []);
+  const signer = provider.getSigner();
+  console.log("Account:", await signer.getAddress());
+  const wrapperContract = new ethers.Contract(wrapperAddress, abi, signer);
+  const dateID = await wrapperContract.postQuestion(merkleroot, treeHash);
 }
 
 function Bacalhau() {
@@ -37,20 +25,20 @@ function Bacalhau() {
   useEffect(() => {
     setIsLoading(true);
     fetch(`http://localhost:8000/get-round-claims/`)
-      .then((res) => res.json())
-      .then((data) => setClaims(data))
-      .catch((error) => console.error("error: ", error))
+      .then(res => res.json())
+      .then(data => setClaims(data))
+      .catch(error => console.error("error: ", error))
       .finally(() => setIsLoading(false));
   }, []);
 
-  const claimsComponents = claims.map((claim) => {
+  const claimsComponents = claims.map(claim => {
     const {
       amount,
       amountUnits,
       claim: claimTitle,
       effectiveDate,
       subject,
-      id,
+      id
     } = claim;
 
     return (
@@ -61,7 +49,7 @@ function Bacalhau() {
           background: "#fff",
           margin: "10px",
           borderRadius: "5px",
-          boxShadow: "1px 10px 22px -5px rgba(0,0,0,0.47)",
+          boxShadow: "1px 10px 22px -5px rgba(0,0,0,0.47)"
         }}
       >
         <div>
@@ -83,7 +71,7 @@ function Bacalhau() {
               weekday: "long",
               year: "numeric",
               month: "short",
-              day: "numeric",
+              day: "numeric"
             })}
           </span>
         </div>
@@ -98,7 +86,7 @@ function Bacalhau() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          padding: "10px",
+          padding: "10px"
         }}
         className={inter.className}
       >
@@ -116,9 +104,9 @@ function Bacalhau() {
                     width: "400px",
                     fontFamily: "inherit",
                     margin: "20px 0",
-                    textAlign: "center",
+                    textAlign: "center"
                   }}
-                  onChange={(e) => {
+                  onChange={e => {
                     setLimit(e.currentTarget.value);
                   }}
                 />
@@ -131,7 +119,7 @@ function Bacalhau() {
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  marginTop: "20px",
+                  marginTop: "20px"
                 }}
               >
                 <button
@@ -139,7 +127,7 @@ function Bacalhau() {
                     padding: "10px 20px",
                     background: "#fff",
                     borderRadius: "5px",
-                    cursor: "pointer",
+                    cursor: "pointer"
                   }}
                   onClick={async () => {
                     if (!limit) {
@@ -153,9 +141,9 @@ function Bacalhau() {
                       const res = await fetch("/api/bacalhau", {
                         method: "POST",
                         headers: {
-                          "Content-Type": "application/json",
+                          "Content-Type": "application/json"
                         },
-                        body: JSON.stringify({ claims, limit: limitAsNumber }),
+                        body: JSON.stringify({ claims, limit: limitAsNumber })
                       });
                       const data = await res.json();
                       const { cid } = data;
@@ -183,7 +171,7 @@ function Bacalhau() {
                   padding: "10px 20px",
                   background: "#fff",
                   borderRadius: "5px",
-                  cursor: "pointer",
+                  cursor: "pointer"
                 }}
                 onClick={async () => {
                   setIsLoading(true);
@@ -191,9 +179,9 @@ function Bacalhau() {
                     const res = await fetch("http://localhost:9000/bacalhau", {
                       method: "POST",
                       headers: {
-                        "Content-Type": "application/json",
+                        "Content-Type": "application/json"
                       },
-                      body: JSON.stringify({ cid }),
+                      body: JSON.stringify({ cid })
                     });
                     const data = await res.json();
                     console.log(data);
