@@ -1,4 +1,4 @@
-#### Impact Evaluator Wrapper Contract
+# Impact Evaluator Wrapper Contract
 
 **Description**: Wrapper.sol first verifies the Merkle root and the Merkle tree with Reality.eth and then allows the user to claim their funds after verifying their eligibility and amount on the Merkle tree. The contract is deployed on the Goerli network and interacts with a mock Reality.eth contract that always returns "True" for all question calls. Transactions use mock USDC tokens for transfers. The deployment addresses are of Wrapper, Mock Reality and Mock listed in the `addresses.txt` file. The contract supports all ERC20 tokens, and the specific token used can be selected at the time of deployment.
 
@@ -20,7 +20,7 @@ go to contracts folder which contains all the files for this piece of project.
 `cd linked-trust-ie/contracts/`
 Install the submodule dependencies in the project by running:
 `forge install`
-Install OpenZepplelin Contracts as a dependency(You may have to commit your previous changes beforehand)
+Install OpenZeppelin Contracts as a dependency(You may have to commit your previous changes beforehand)
 `forge install OpenZeppelin/openzeppelin-contracts`
 To build, run:
 `forge build`
