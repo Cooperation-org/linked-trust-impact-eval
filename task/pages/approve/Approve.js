@@ -4,6 +4,7 @@ import { Inter } from "@next/font/google";
 import Head from "next/head";
 import { useViewerConnection } from "@self.id/framework";
 import { getCompose } from "../../compose";
+import { getUnixTime } from "../../helpers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -261,7 +262,7 @@ export default function Approve() {
                       amount: Number(credit),
                       amountUnits: "USDC",
                       source: source,
-                      effectiveDate,
+                      effectiveDate: getUnixTime(effectiveDate),
                       rootClaimId,
                     };
 
