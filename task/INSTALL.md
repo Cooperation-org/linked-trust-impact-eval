@@ -157,10 +157,34 @@ composedb composite:compile ie-claim-composite.json ./__generated__/definition.j
 composedb composite:deploy ie-claim-composite.json --ceramic-url=http://0.0.0.0:7007
 ```
 
-##### Start the graphQL Server
+#### Python query server
 
-Start the local server with GraphiQL using the runtime composite:
+Create a virtual environment for running the composedb query app with python.
 
 ```
-composedb graphql:server --ceramic-url=http://0.0.0.0:7007 --graphiql --port=5001 ie-claim-composite-runtime.json
+python3 -m venv /path/to/env/directory
+```
+
+Activate the python environement.
+
+```
+source /path/to/env/directory/bin/activate
+```
+
+In `composedb` directory create a `.env` file. This needs the database path to ceramic sqlite. Usually the ceramic sqlite is in this path - `~/.ceramic/indexing.sqlite`. But the path needs to an absolute value. You can get the absolute value by this - `readlink -f ~/.ceramic/indexing.sqlite`.
+
+```
+DB_PATH=path_to_ceramic_sqlite_db
+```
+
+Install the dependencies:
+
+```
+pip3 install -r requirements.txt
+```
+
+Then just run the app:
+
+```
+python app/main.py
 ```
