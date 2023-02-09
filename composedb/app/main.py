@@ -1,17 +1,15 @@
-import os
-import json
-import uvicorn
-from fastapi import FastAPI, HTTPException, status
-from fastapi.middleware.cors import CORSMiddleware
-from db import cursor
+from dotenv import load_dotenv  # nopep8
+load_dotenv()  # nopep8
 import datetime
+from db import cursor
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException, status
+import uvicorn
+import json
+import os
 
 
 PORT = os.getenv('GET_QUERY_PORT', 8000)
-DB_TABLE_GITHUB = os.getenv('DB_TABLE_GITHUB')
-DB_TABLE_FIVERR = os.getenv('DB_TABLE_FIVERR')
-DB_TABLE_PLATFORM_API_KEY = os.getenv('DB_TABLE_PLATFORM_API_KEY')
-DB_TABLE_PLATFORM_RATING = os.getenv('DB_TABLE_PLATFORM_RATING')
 
 app = FastAPI()
 origins = [
