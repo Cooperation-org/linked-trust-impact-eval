@@ -4,6 +4,7 @@ import { Inter } from "@next/font/google";
 import Head from "next/head";
 import { useViewerConnection } from "@self.id/framework";
 import { getCompose } from "../../compose";
+import { getUnixTime } from "../../helpers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,7 +14,7 @@ export const CREATE_CLAIM = `
     $subject: String!
     $rootClaimId: String
     $amount: Int
-    $effectiveDate: String!
+    $effectiveDate: Int!
   ){
     createIEClaim(
       input: {
@@ -161,13 +162,14 @@ export default function Distribute() {
               "Distribute.js:submit - Did not find wallet for user"
             );
           }
+
           const earned_variables = {
             claim: activeTask.task,
             subject: wallet,
             amount: parseInt(inputFields[i].amount),
             amountUnits: "USDC",
             source: activeTask.source,
-            effectiveDate: activeTask.effectiveDate,
+            effectiveDate: getUnixTime(activeTask.effectiveDate),
             rootClaimID,
           };
           const earnedResponse = await createClaim(compose, earned_variables);
