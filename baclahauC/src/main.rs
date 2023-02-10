@@ -65,7 +65,7 @@ fn run() -> Result<(), Box<dyn Error>> {
     // loop through claims and grab the root
     for claim in claims.iter() {
         //check if claim is a root claim
-        if claim.claim == "Root" {
+        if claim.rootClaimId == "Root" {
             // add the root claim amount to the total root amount
             total_root = total_root + claim.amount;
             // grab the root ID
