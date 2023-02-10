@@ -1,16 +1,19 @@
 # Impact Evaluator Wrapper Contract
 
-**Description**: Wrapper.sol first verifies the Merkle root and the Merkle tree with Reality.eth and then allows the user to claim their funds after verifying their eligibility and amount on the Merkle tree. The contract is deployed on the Goerli network and interacts with a mock Reality.eth contract that always returns "True" for all question calls. Transactions use mock USDC tokens for transfers. The deployment addresses are of Wrapper, Mock Reality and Mock listed in the `addresses.txt` file. The contract supports all ERC20 tokens, and the specific token used can be selected at the time of deployment.
+**Description**: Wrapper.sol first verifies the Merkle root and the Merkle tree with Reality.eth and then allows the user to claim their funds after verifying their eligibility and amount on the Merkle tree. \
+ The contract is deployed on the Goerli network and interacts with a mock Reality.eth contract that always returns a `bytes32` response for all askQuestion() calls, and returns a `bytes32` true for all `getFinalAnswer()`. Transactions use mock ERC20 tokens for transfers. The deployment addresses of Wrapper, MockReality and TestERC20 are listed in the `addresses.txt` file. The contract supports all ERC20 tokens, and the specific token used can be selected at the time of deployment.
 \
 \
-In this README.md we will go through the process of 
-- Installing the required dependencies 
-- Running a local blockchain node using `anvil`, 
+In this README.md we will go through the process of:
+- Installing the required dependencies.
+- Running a *local blockchain* node using `anvil`.
 - Deploying MockReality, MockERC20 and Wrapper contract on it usind `forge create`. 
-- Calling a Wrapper contract's function using `cast`.
+- Calling the Wrapper contract's function using `cast`.
+\
+The process of deploying to Goerli will be quite similar. 
 ## Dependencies
 
-The project is written in Solidity and uses [Foundry](https://github.com/foundry-rs/foundry) as the develpment framework. \
+The project is written in Solidity and uses [Foundry](https://github.com/foundry-rs/foundry) as the development framework. \
 To install Foundry run: \
 `$ curl -L https://foundry.paradigm.xyz | bash` \
 This will download foundryup , Foundry's toolchain installer. Install it by running: \
@@ -36,7 +39,7 @@ To run test: \
 
 Now that the contracts are compiled and tested, run:  \
 `$ anvil` \
-Anvil creates a testnet node for deploying and testing smart contracts.   
+Anvil creates a testnet node for deploying and testing smart contracts.  
 
 ```
                              _   _
@@ -102,15 +105,17 @@ Listening on 127.0.0.1:8545
 
 
 ```
-Here anvil gives us ten accounts and their private keys and an rpc endpoint on `127.0.0.1:8545`
 
-Now that we have a network and contracts, we'll deploy
+Here anvil gives us ten accounts, their private keys and an rpc endpoint on `127.0.0.1:8545`
 
-We will use account0's private key to deploy RealityMock    
+Now that we have a network and contracts, we'll deploy. More information about deploying can be found in the docs [here](https://book.getfoundry.sh/forge/deploying) . Keep `anvil`'s instance running on one terminal and open another terminal to do the calls.
 
-`$ forge create --rpc-url http://localhost:8545/ --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 src/mock/RealityMock.sol:RealityMock`
- \ output: 
-\
+We will use account0's private key to deploy RealityMock. Export it by: 
+
+`$ export PRIVATE_KEY=<private key from account0>`
+
+`$ forge create --rpc-url http://localhost:8545/ --private-key $PRIVATE_KEY  src/mock/RealityMock.sol:RealityMock`
+
 ```
 [⠔] Compiling...
 No files changed, compilation skipped
@@ -119,11 +124,11 @@ Deployed to: 0x5FbDB2315678afecb367f032d93F642f64180aa3
 Transaction hash: 0x0147a03c5ecf5bf0a6d12ae6e6637ec5479c7ccef8153e955e00a38d6a3d198e
 
 ```
-We will keep Reality's address 0x5FbDB2315678afecb367f032d93F642f64180aa3 because we need to pass it to Wrapper's constructor during deployment
+We will keep Reality's address `0x5FbDB2315678afecb367f032d93F642f64180aa3` because we need to pass it to Wrapper's constructor during deployment.
 
-Another parameter Wrapper contract needs for deployment is TestERC20 deployment address so we'll keep it handy as well.
+Another parameter Wrapper Contract's constructor needs for deployment is TestERC20 deployment address so we'll keep it handy as well.
 
-`$ forge create --rpc-url http://localhost:8545/ --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 src/mock/TestERC20.sol:TestERC20`
+`$ forge create --rpc-url http://localhost:8545/ --private-key $PRIVATE_KEY src/mock/TestERC20.sol:TestERC20`
 
 ```
 [⠔] Compiling...
@@ -133,9 +138,10 @@ Deployed to: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
 Transaction hash: 0x19d8a8d5af348710982ea52395301c534d354983e6ff88a804027470ff6e34b1
 
 ```
-Now that we have all the required parameters, we'll deploy Wrapper as well. 
+Now that we have all the required parameters, we'll deploy Wrapper as well. \
+We will pass Reality's and TestERC20's deployment address as `--contructor-args`. 
 
-`$ forge create --rpc-url http://localhost:8545/ --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 src/Wrapper.sol:Wrapper --constructor-args 0x5FbDB2315678afecb367f032d93F642f64180aa3 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512`
+`$ forge create --rpc-url http://localhost:8545/ --private-key $PRIVATE_KEY src/Wrapper.sol:Wrapper --constructor-args 0x5FbDB2315678afecb367f032d93F642f64180aa3 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512`
 
 ```
 [⠔] Compiling...
@@ -146,33 +152,38 @@ Transaction hash: 0x38f6c61509a19b02377a762b5a062218366f2b235f1fd39f59622f5cc246
 
 
 ```
-Now we call postQuestion() from Wrapper contract, by passing a root(string) and string[] (A string of hashses) in it. `0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0` is the deployment address of Wrapper Contract and `0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266` is the caller's address. The response is a bytes32 question Id.
+Now we call postQuestion() from Wrapper contract, by passing a root(string) and string[] (A string of hashses) in it. `0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0` is the deployment address of Wrapper Contract. The response is a bytes32 question Id.
 
-`$ cast call 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 --from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 "postQuestion(string ,string[])(bytes32)" "0xb6a5508696541a52a1d2ab60952234050efc34e49c68e19f4389d10dca9e4c46" ["0x8584e54df79d9ea3216195ce034977968f01457c100","0x624ec4a3ffa86bcef4d06706034d1fddbc9f56b4100","0x7ff8b020c2ecd40613063ae1d2ee6a2a383793fa100"]
-`
+`$ cast call 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 --from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 "postQuestion(string ,string[])(bytes32)" "0xb6a5508696541a52a1d2ab60952234050efc34e49c68e19f4389d10dca9e4c46" ["0x8584e54df79d9ea3216195ce034977968f01457c100","0x624ec4a3ffa86bcef4d06706034d1fddbc9f56b4100","0x7ff8b020c2ecd40613063ae1d2ee6a2a383793fa100"] `
 
 ```
 0x0000000000000000000000000000000000000000000000000000000063e3b228
 
 ```
+Now we try to call `postQuestion()` from account1, instead of account0. 
 
+`$ cast call 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 --from 0x70997970C51812dc3A010C7d01b50e0d17dc79C8 "postQuestion(string ,string[])(bytes32)" "0xb6a5508696541a52a1d2ab60952234050efc34e49c68e19f4389d10dca9e4c46" ["0x8584e54df79d9ea3216195ce034977968f01457c100","0x624ec4a3ffa86bcef4d06706034d1fddbc9f56b4100","0x7ff8b020c2ecd40613063ae1d2ee6a2a383793fa100"]`
+
+```
+Error: 
+(code: 3, message: execution reverted: Ownable: caller is not the owner, data: Some(String("0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000204f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572")))
+```
+The Transaction returns with an Error Message beacause the Wrapper Contract wasn't deployed by `account1` and can't be called by it. 
 
 
 ## Known issues
-You may have to make a `remappings.txt` file in your root folder of the project, and add following mappings if you get mapping related errors while working with `forge`.
+You may have to make a `remappings.txt` file in the root folder of the project and add following mappings if you get mapping related errors while working with `forge`.
 
 ```
 ds-test/=lib/forge-std/lib/ds-test/src/
 forge-std/=lib/forge-std/src/
 openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/
-
 ```
 If this doesn't work out, remove "contracts" in all import and try again \
-`import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol"` => `import "openzeppelin-contracts/token/ERC20/IERC20.sol"`.
+`$ import "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol"` => `import "openzeppelin-contracts/token/ERC20/IERC20.sol"`.
 
 
 ## Getting help
 If you have questions, concerns, bug reports, etc, please file an issue in this repository's Issue Tracker.
 
 ---
-
