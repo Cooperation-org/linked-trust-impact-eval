@@ -15,6 +15,7 @@ export const CREATE_CLAIM = `
     $rootClaimId: String
     $amount: Int
     $effectiveDate: Int!
+    $claimSatisfactionStatus: String,
   ){
     createIEClaim(
       input: {
@@ -24,6 +25,7 @@ export const CREATE_CLAIM = `
           rootClaimId: $rootClaimId
           amount: $amount
           effectiveDate: $effectiveDate
+          claimSatisfactionStatus: $claimSatisfactionStatus
         }
       }
     ){
@@ -34,6 +36,7 @@ export const CREATE_CLAIM = `
         amount
         rootClaimId
         effectiveDate
+        claimSatisfactionStatus
       }
     }
   }
@@ -56,7 +59,7 @@ export default function Distribute() {
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
   const [showDistributeTo, setShowDistributeTo] = useState(0.0);
-  const [rootClaimID, setRootClaimID] = useState("");
+  const [rootClaimIds, setRootClaimIds] = useState({});
   const [activeTask, setActiveTask] = useState({
     task: "",
     id: 0,
@@ -119,11 +122,13 @@ export default function Distribute() {
     let newfield = { member: "", amount: 0 };
     setInputFields([...inputFields, newfield]);
   };
+
   const removeFields = (index) => {
     let data = [...inputFields];
     data.splice(index, 1);
     setInputFields(data);
   };
+
   const submit = async (e) => {
     e.preventDefault();
 
@@ -170,7 +175,8 @@ export default function Distribute() {
             amountUnits: "USDC",
             source: activeTask.source,
             effectiveDate: getUnixTime(activeTask.effectiveDate),
-            rootClaimID,
+            rootClaimId: rootClaimIds[activeTask.id],
+            claimSatisfactionStatus: "unsatisfied",
           };
           const earnedResponse = await createClaim(compose, earned_variables);
           if (earnedResponse.message == "SUCCESS") {
@@ -524,12 +530,32 @@ export default function Distribute() {
                 paddingTop: "20px",
                 display: "flex",
                 justifyContent: "center",
+                flexDirection: "column",
+                alignItems: "center",
               }}
             >
+              <input
+                type="text"
+                placeholder="Root Claim Id"
+                name="rootClaimId"
+                value={rootClaimIds[id] || ""}
+                onChange={(e) =>
+                  setRootClaimIds({
+                    ...rootClaimIds,
+                    [id]: e.currentTarget.value,
+                  })
+                }
+                style={{ padding: "16px", width: "250px", fontSize: "16px" }}
+              />
               <span style={{ padding: "25px 2px 25px 0px" }}>
                 <button
                   className={styles.btn}
+                  style={{ padding: "16px", borderRadius: "5px" }}
                   onClick={async () => {
+                    if (!rootClaimIds[id]) {
+                      alert("Root Claim Id required");
+                      return;
+                    }
                     setActiveTask({
                       task,
                       id,

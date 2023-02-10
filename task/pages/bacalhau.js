@@ -33,7 +33,11 @@ function Bacalhau() {
     setIsLoading(true);
     fetch(`http://localhost:8000/get-round-claims/`)
       .then((res) => res.json())
-      .then((data) => setClaims(data))
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setClaims(data);
+        }
+      })
       .catch((error) => console.error("error: ", error))
       .finally(() => setIsLoading(false));
   }, []);

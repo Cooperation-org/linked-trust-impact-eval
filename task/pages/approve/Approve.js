@@ -16,6 +16,7 @@ export const CREATE_CLAIM = `
     $amount: Int
     $source: String
     $effectiveDate: Int!
+    $claimSatisfactionStatus: String
   ){
     createIEClaim(
       input: {
@@ -26,6 +27,7 @@ export const CREATE_CLAIM = `
           amount: $amount
           source: $source
           effectiveDate: $effectiveDate
+          claimSatisfactionStatus: $claimSatisfactionStatus
         }
       }
     ){
@@ -37,6 +39,7 @@ export const CREATE_CLAIM = `
         source
         rootClaimId
         effectiveDate
+        claimSatisfactionStatus
       }
     }
   }
@@ -72,6 +75,7 @@ export default function Approve() {
   const [approved, setApproved] = useState(false);
   const [totalDistributedAmt, setTotalDistributedAmt] = useState(0.0);
   const [totalApprovedAmt, setTotalApprovedAmt] = useState(0.0);
+  const [approverWalletId, setAapproverWalletId] = useState("");
 
   const [connection] = useViewerConnection();
 
@@ -84,6 +88,17 @@ export default function Approve() {
         setTasks(b.userStoryList.tasks);
         setUsers(b.projectDetail.users);
       });
+  }, []);
+
+  useState(() => {
+    if (typeof window !== "undefined") {
+      window.ethereum
+        .request({
+          method: "eth_requestAccounts",
+        })
+        .then((accounts) => setAapproverWalletId(accounts[0]))
+        .catch((err) => console.log(err.message));
+    }
   }, []);
 
   let tasksComponent;
@@ -258,12 +273,13 @@ export default function Approve() {
                     // Create the "Approved" Claim
                     const approvedVariables = {
                       claim: task,
-                      subject: "<wallet>",
-                      amount: Number(credit),
+                      subject: approverWalletId,
+                      amount: Math.ceil(Number(amount)),
                       amountUnits: "USDC",
                       source: source,
                       effectiveDate: getUnixTime(effectiveDate),
-                      rootClaimId,
+                      rootClaimId: "root",
+                      claimSatisfactionStatus: "unsatisfied",
                     };
 
                     const approvedResponse = await createClaim(
