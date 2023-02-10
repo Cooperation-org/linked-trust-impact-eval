@@ -1,13 +1,13 @@
 # Impact Evaluator Wrapper Contract
 
 **Description**: Wrapper.sol first verifies the Merkle root and the Merkle tree with Reality.eth and then allows the user to claim their funds after verifying their eligibility and amount on the Merkle tree. \
- The contract is deployed on the Goerli network and interacts with a mock Reality.eth contract that always returns a `bytes32` response for all askQuestion() calls, and returns a `bytes32` true for all `getFinalAnswer()`. Transactions use mock ERC20 tokens for transfers. The deployment addresses of Wrapper, MockReality and TestERC20 are listed in the `addresses.txt` file. The contract supports all ERC20 tokens, and the specific token used can be selected at the time of deployment.
+ The contract is deployed on the Goerli network and interacts with a mock Reality.eth contract that always returns a `bytes32` response for all `askQuestion()` calls, and returns a `bytes32` true for all `getFinalAnswer()` calls. Transactions use mock ERC20 tokens for transfers. The deployment addresses of Wrapper, MockReality and TestERC20 are listed in the `addresses.txt` file. The contract supports all ERC20 tokens, and the specific token used can be selected at the time of deployment.
 \
 \
 In this README.md we will go through the process of:
 - Installing the required dependencies.
 - Running a *local blockchain* node using `anvil`.
-- Deploying MockReality, MockERC20 and Wrapper contract on it usind `forge create`. 
+- Deploying MockReality, MockERC20 and Wrapper contract on it using `forge create`. 
 - Calling the Wrapper contract's function using `cast`.
 \
 The process of deploying to Goerli will be quite similar. 
@@ -152,7 +152,7 @@ Transaction hash: 0x38f6c61509a19b02377a762b5a062218366f2b235f1fd39f59622f5cc246
 
 
 ```
-Now we call postQuestion() from Wrapper contract, by passing a root(string) and string[] (A string of hashses) in it. `0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0` is the deployment address of Wrapper Contract. The response is a bytes32 question Id.
+Now we call `postQuestion()` from Wrapper contract, by passing a string(Merkle Root) and string[] (Tree Hashes) in it. `0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0` is the deployment address of Wrapper Contract. The response is a bytes32 question Id.
 
 `$ cast call 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0 --from 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266 "postQuestion(string ,string[])(bytes32)" "0xb6a5508696541a52a1d2ab60952234050efc34e49c68e19f4389d10dca9e4c46" ["0x8584e54df79d9ea3216195ce034977968f01457c100","0x624ec4a3ffa86bcef4d06706034d1fddbc9f56b4100","0x7ff8b020c2ecd40613063ae1d2ee6a2a383793fa100"] `
 
@@ -168,7 +168,7 @@ Now we try to call `postQuestion()` from account1, instead of account0.
 Error: 
 (code: 3, message: execution reverted: Ownable: caller is not the owner, data: Some(String("0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000204f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e6572")))
 ```
-The Transaction returns with an Error Message beacause the Wrapper Contract wasn't deployed by `account1` and can't be called by it. 
+The Transaction returns with an `Error` beacause the Wrapper Contract wasn't deployed by `account1` and can't be called by it. 
 
 
 ## Known issues
