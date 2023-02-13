@@ -1,35 +1,35 @@
 {
-  "limit": 2000,
+  "limit": 5000,
   "claims": [
     {
-      "claim": "Root",
+      "claim": "A task",
+      "amount": 285,
+      "subject": "0x1413862c2b7054cdbfdc181b83962cb0fc11fd92",
+      "amountUnits": "USDC",
+      "rootClaimId": "Root",
+      "effectiveDate": 1676321013,
+      "claimSatisfactionStatus": "unsatisfied",
+      "id": "kjzl6kcym7w8y5oi4v71f41lfz0j0j3oxfmjmvs9qwlha11ugrfrbvk8hkk8s43"
+    },
+    {
+      "claim": "Earned claim 1",
       "amount": 100,
-      "subject": "",
-      "amountUnits": "ETH",
-      "rootClaimId": "kjzl6kcym7w8y5u49e724s7wh1j7zxch9ikwcy5klwe9tfhet8t894cqkvnjw3p",
-      "effectiveDate": 1675433476,
+      "subject": "0x7bfDAFd252BB41d53e4Ff34FD39e20377866FC24",
+      "amountUnits": "USDC",
+      "rootClaimId": "kjzl6kcym7w8y5oi4v71f41lfz0j0j3oxfmjmvs9qwlha11ugrfrbvk8hkk8s43",
+      "effectiveDate": 1674324000,
       "claimSatisfactionStatus": "unsatisfied",
-      "id": "kjzl6kcym7w8y5u49e724s7wh1j7zxch9ikwcy5klwe9tfhet8t894cqkvnjw3p"
+      "id": "kjzl6kcym7w8y879dy8pmd1vydo4ikzctpwthe9q4a6sf8lrqv3qlix6yiydzbh"
     },
     {
-      "claim": "A subject",
-      "amount": 75,
-      "subject": "0x317F6BB70819384c2944f8f8EFa049a983c5ad02",
-      "amountUnits": "ETH",
-      "rootClaimId": "kjzl6kcym7w8y5u49e724s7wh1j7zxch9ikwcy5klwe9tfhet8t894cqkvnjw3p",
-      "effectiveDate": 1675433754,
+      "claim": "Earned claim 2",
+      "amount": 150,
+      "subject": "0xc7bAeaAB508167F90777ae29A6F5FFaB432f0f41",
+      "amountUnits": "USDC",
+      "rootClaimId": "kjzl6kcym7w8y5oi4v71f41lfz0j0j3oxfmjmvs9qwlha11ugrfrbvk8hkk8s43",
+      "effectiveDate": 1674324000,
       "claimSatisfactionStatus": "unsatisfied",
-      "id": "kjzl6kcym7w8yafti6zxio5r9mtdqhowfz7so3zw1bedeepy0n5a0vy13rbkn03"
-    },
-    {
-      "claim": "A subject",
-      "amount": 25,
-      "subject": "0x1413862C2B7054CDbfdc181B83962CB0FC11fD92",
-      "amountUnits": "ETH",
-      "rootClaimId": "kjzl6kcym7w8y5u49e724s7wh1j7zxch9ikwcy5klwe9tfhet8t894cqkvnjw3p",
-      "effectiveDate": 1675433754,
-      "claimSatisfactionStatus": "unsatisfied",
-      "id": "kjzl6kcym7w8ya7jhwkscslp9bopteordsemzu9uuq8b78ys11c00rie41hsg86"
+      "id": "kjzl6kcym7w8y6us35odk2rq1suy84u2nm85fqdq4m706xh9vt6v3649vzhnf6a"
     }
   ]
 }

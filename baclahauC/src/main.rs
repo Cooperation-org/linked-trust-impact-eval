@@ -77,7 +77,7 @@ fn run() -> Result<(), Box<dyn Error>> {
                 // if claim is earned claim that belongs to current root
                 if e_claim.rootClaimId == root_id.clone() {
                     // // get earned claims address
-                    let add: String = e_claim.rootClaimId.clone();
+                    let add: String = e_claim.subject.clone();
                     //check if root
                     let is_root: String = e_claim.rootClaimId.clone();
                      // check if the address is an empty string signifying the claim is a root claim
@@ -102,7 +102,7 @@ fn run() -> Result<(), Box<dyn Error>> {
             //grab root total after looping through all claims for a root
             let root_total = root_earned.get(&root_id).copied().unwrap_or(0);
             // if the root calculated total exceeds the roots alloted max
-                if root_total < root_max {
+                if root_total > root_max {
                     //end the program
                     process::exit(1);
                 }
@@ -112,7 +112,6 @@ fn run() -> Result<(), Box<dyn Error>> {
         }
     //loop over accounts hashmap and retreive the account and its amount value
     for (address, amount) in &accounts {
-        println!("{} has {} tokens alloted to them", address, amount);
         // construct leaf from values stored in accounts hash map
         let mut leaf_string: String = address.to_owned();
         //grab amount
