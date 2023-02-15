@@ -14,6 +14,7 @@ export const CREATE_CLAIM = `
     $subject: String!
     $rootClaimId: String
     $amount: Int
+    $amountUnits: String
     $source: String
     $effectiveDate: Int!
     $claimSatisfactionStatus: String
@@ -25,6 +26,7 @@ export const CREATE_CLAIM = `
           subject: $subject
           rootClaimId: $rootClaimId
           amount: $amount
+          amountUnits: $amountUnits
           source: $source
           effectiveDate: $effectiveDate
           claimSatisfactionStatus: $claimSatisfactionStatus
@@ -36,6 +38,7 @@ export const CREATE_CLAIM = `
         claim
         subject
         amount
+        amountUnits 
         source
         rootClaimId
         effectiveDate
@@ -278,7 +281,7 @@ export default function Approve() {
                       amountUnits: "USDC",
                       source: source,
                       effectiveDate: getUnixTime(effectiveDate),
-                      rootClaimId: "root",
+                      rootClaimId: "Root",
                       claimSatisfactionStatus: "unsatisfied",
                     };
 

@@ -46,8 +46,18 @@ def format_doc_list(docs):
     for doc in docs:
         id, json_string = doc
         record = json.loads(json_string)
-        record["id"] = id
-        records.append(record)
+        record_formatted = {}
+
+        record_formatted["id"] = id
+        record_formatted["claim"] = record.get("claim", "")
+        record_formatted["amount"] = record.get("amount", 0)
+        record_formatted["subject"] = record.get("subject", "")
+        record_formatted["amountUnits"] = record.get("amountUnits", "")
+        record_formatted["rootClaimId"] = record.get("rootClaimId", "")
+        record_formatted["effectiveDate"] = record.get("effectiveDate", 0)
+        record_formatted["claimSatisfactionStatus"] = record.get("claimSatisfactionStatus", "")
+
+        records.append(record_formatted)
     return records
 
 
