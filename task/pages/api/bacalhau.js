@@ -10,7 +10,6 @@ export default async function handler(req, res) {
     const { claims, limit } = req.body;
 
     for (const claim of claims) {
-      console.log(claim);
       if (!claim["rootClaimId"]) {
         claim["rootClaimId"] = "";
       }

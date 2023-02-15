@@ -14,6 +14,7 @@ export const CREATE_CLAIM = `
     $subject: String!
     $rootClaimId: String
     $amount: Int
+    $amountUnits: String
     $effectiveDate: Int!
     $claimSatisfactionStatus: String,
   ){
@@ -24,6 +25,7 @@ export const CREATE_CLAIM = `
           subject: $subject
           rootClaimId: $rootClaimId
           amount: $amount
+          amountUnits: $amountUnits
           effectiveDate: $effectiveDate
           claimSatisfactionStatus: $claimSatisfactionStatus
         }
@@ -34,6 +36,7 @@ export const CREATE_CLAIM = `
         claim
         subject
         amount
+        amountUnits
         rootClaimId
         effectiveDate
         claimSatisfactionStatus
