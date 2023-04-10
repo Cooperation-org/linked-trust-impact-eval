@@ -1,4 +1,4 @@
-# Impact Evaluator
+# Linked Trust Impact Evaluator
 
 **Description**:
 This is a reference application that completes the full lifecycle of writing impact claims onto Ceramic ComposeDB, computing the rewards in Bacalhau and distributing rewards. For every "round", the wrapper contract will put the result on-chain using Gnosis safe. When all wallet owners approve the transactions, the rewards will be distributed.
